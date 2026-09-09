@@ -715,3 +715,44 @@ def test_sigma_field_null_matches_absent() -> None:
     y = "detection:\n  selection:\n    Ghost: null\n  condition: selection\n"
     assert _fires(y, [{"Other": "x"}])            # Ghost absent -> matches null
     assert not _fires(y, [{"Ghost": "present"}])
+
+
+# --------------------------------------------------------------------------
+# Task 2: `all of them` / `1 of them` / `N of ...` conditions (M2, M3)
+# --------------------------------------------------------------------------
+
+
+def test_sigma_all_of_them() -> None:
+    y = (
+        "detection:\n"
+        "  selection_a:\n    Image: 'cmd.exe'\n"
+        "  selection_b:\n    CommandLine|contains: 'whoami'\n"
+        "  condition: all of them\n"
+    )
+    assert _fires(y, [{"Image": "cmd.exe", "CommandLine": "cmd /c whoami"}])
+    assert not _fires(y, [{"Image": "cmd.exe", "CommandLine": "cmd /c dir"}])
+
+
+def test_sigma_one_of_them() -> None:
+    y = (
+        "detection:\n"
+        "  selection_a:\n    Image: 'cmd.exe'\n"
+        "  selection_b:\n    CommandLine: 'whoami'\n"
+        "  condition: 1 of them\n"
+    )
+    assert _fires(y, [{"Image": "cmd.exe"}])
+    assert _fires(y, [{"CommandLine": "whoami"}])
+    assert not _fires(y, [{"Image": "notepad.exe"}])
+
+
+def test_sigma_n_of_selection_glob() -> None:
+    y = (
+        "detection:\n"
+        "  selection_a:\n    A: '1'\n"
+        "  selection_b:\n    B: '1'\n"
+        "  selection_c:\n    C: '1'\n"
+        "  condition: 2 of selection_*\n"
+    )
+    assert _fires(y, [{"A": "1", "B": "1"}])       # 2 match
+    assert _fires(y, [{"A": "1", "B": "1", "C": "1"}])  # 3 match
+    assert not _fires(y, [{"A": "1"}])             # only 1

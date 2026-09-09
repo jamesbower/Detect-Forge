@@ -426,6 +426,14 @@ class _OneOf(_CondNode):
         self.names = names
 
 
+class _NOf(_CondNode):
+    """`N of <glob>` — at least ``n`` of the expanded selections are true."""
+
+    def __init__(self, n: int, names: list[str]) -> None:
+        self.n = n
+        self.names = names
+
+
 def _parse_condition(expr: str, selection_names: list[str]) -> _CondNode:
     """Small recursive-descent parser for Sigma condition expressions.
 
@@ -434,7 +442,11 @@ def _parse_condition(expr: str, selection_names: list[str]) -> _CondNode:
         or_expr := and_expr ('or' and_expr)*
         and_expr := unary ('and' unary)*
         unary := 'not' unary | primary
-        primary := IDENT | '(' expr ')' | 'all of' GLOB | '1 of' GLOB
+        primary := IDENT | '(' expr ')' | 'all of' GLOB | '<N> of' GLOB
+
+    ``GLOB`` may be ``them`` (all search identifiers), a literal selection
+    name, or a ``selection_*`` wildcard. ``N`` is any positive integer;
+    ``1 of`` is the common special case.
     """
     tokens = _tokenize_condition(expr)
     parser = _CondParser(tokens, selection_names)
@@ -443,7 +455,7 @@ def _parse_condition(expr: str, selection_names: list[str]) -> _CondNode:
 
 def _tokenize_condition(expr: str) -> list[str]:
     # Replace operators with spaced tokens; split on whitespace and parens.
-    pattern = r"\(|\)|\ball of\b|\b1 of\b|\band\b|\bor\b|\bnot\b|[A-Za-z_][A-Za-z_0-9\*]*"
+    pattern = r"\(|\)|\ball of\b|\b\d+ of\b|\band\b|\bor\b|\bnot\b|[A-Za-z_][A-Za-z_0-9\*]*"
     return re.findall(pattern, expr)
 
 
@@ -493,14 +505,19 @@ class _CondParser:
         if t == "all of":
             glob = self._consume()
             return _AllOf(_expand_glob(glob, self.selection_names))
-        if t == "1 of":
+        n_of = re.match(r"^(\d+) of$", t)
+        if n_of:
             glob = self._consume()
-            return _OneOf(_expand_glob(glob, self.selection_names))
+            n = int(n_of.group(1))
+            names = _expand_glob(glob, self.selection_names)
+            return _OneOf(names) if n <= 1 else _NOf(n, names)
         return _Ref(t)
 
 
 def _expand_glob(glob: str, names: list[str]) -> list[str]:
-    """'selection_*' → all selection_* names; literal name → [name]."""
+    """'them' → all search identifiers; 'selection_*' → matching names; literal → [name]."""
+    if glob == "them":
+        return list(names)
     if "*" not in glob:
         return [glob]
     pattern = re.compile("^" + re.escape(glob).replace(r"\*", ".*") + "$")
@@ -524,6 +541,8 @@ def _evaluate_condition(node: _CondNode, sel_results: dict[str, bool]) -> bool:
         return all(sel_results.get(n, False) for n in node.names)
     if isinstance(node, _OneOf):
         return any(sel_results.get(n, False) for n in node.names)
+    if isinstance(node, _NOf):
+        return sum(1 for name in node.names if sel_results.get(name, False)) >= node.n
     return False
 
 
