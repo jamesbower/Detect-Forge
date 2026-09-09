@@ -7,8 +7,33 @@ name = "detect-forge"
 version = "0.1.0"
 description = "AI Native Detection engineering toolkit. One install, one config, one CI step."
 readme = "README.md"
-license = { text = "MIT" }
+license = "MIT"
 requires-python = ">=3.12"
+authors = [{ name = "James Bower" }]
+keywords = [
+    "detection-engineering",
+    "sigma",
+    "elastic",
+    "mitre-attack",
+    "security",
+    "ci",
+    "backtest",
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Information Technology",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Topic :: Security",
+    "Topic :: Software Development :: Quality Assurance",
+    "Typing :: Typed",
+]
 dependencies = [
     "click>=8.2",
     "pydantic>=2.0",
@@ -25,9 +50,9 @@ dependencies = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/jamesbower/detect-forge"
-Repository = "https://github.com/jamesbower/detect-forge"
-Issues = "https://github.com/jamesbower/detect-forge/issues"
+Homepage = "https://github.com/jamesbower/Detect-Forge"
+Repository = "https://github.com/jamesbower/Detect-Forge"
+Issues = "https://github.com/jamesbower/Detect-Forge/issues"
 
 [project.scripts]
 detect-forge = "detect_forge.cli:main"
@@ -45,6 +70,7 @@ dev = [
 [tool.hatch.build.targets.wheel]
 packages = ["src/detect_forge"]
 include = [
+    "src/detect_forge/py.typed",
     "src/detect_forge/audit/templates/*",
     "src/detect_forge/backtest/corpus_data/*.json",
     "src/detect_forge/backtest/templates/*",

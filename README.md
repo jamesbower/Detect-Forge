@@ -29,7 +29,8 @@ Designed to run in GitHub Actions as a CI gate. No data leaves your environment.
 ## Install
 
 ```bash
-python3.12 -m venv .venv
+# Requires Python 3.12+ — use python3.12 explicitly, or any python3 that is >= 3.12
+python3 -m venv .venv
 source .venv/bin/activate
 pip install -e ".[dev]"
 ```
@@ -59,7 +60,7 @@ detect-forge stale path/to/rules
 | `RULE_DIR` (positional) | — | Directory of detection rules to scan. Recursively picks up `.yml`/`.yaml` (Sigma) and `.toml` (Elastic Detection Rules: EQL/KQL/ESQL). Must exist. |
 | `--format {terminal,json,html}` | `terminal` | Output format. |
 | `-o, --output PATH` | _stdout_ | Write output to a file instead of stdout. |
-| `--min-severity {low,medium,high,critical}` | `low` | Only show rules at or above this severity. |
+| `--min-severity {info,low,medium,high,critical}` | `low` | Only show rules at or above this severity. `info` surfaces no-ATT&CK-tag and unknown-technique findings. |
 | `--no-cache` | off | Bypass the disk cache and fetch a fresh ATT&CK bundle. |
 | `--domain {enterprise-attack,ics-attack,mobile-attack}` | `enterprise-attack` | ATT&CK domain to fetch. |
 | `--semantic-threshold FLOAT` | `0.65` | Cosine similarity threshold; pairs below this value emit a `semantic_drift` finding. |
@@ -179,8 +180,8 @@ The Navigator JSON output drops directly into https://mitre-attack.github.io/att
 | State | Meaning |
 |---|---|
 | **full** | At least one rule is tagged with this exact technique ID. |
-| **shallow** | Only the parent technique is tagged (e.g. rule tags `T1059`; sub `T1059.001` is shallow). |
-| **gap** | No rules reference this technique at any level. |
+| **shallow** | Covered only indirectly — either the parent is tagged and this sub is inferred (rule tags `T1059`; sub `T1059.001` is shallow), or a sub is tagged and its parent is inferred (rule tags `T1059.001`; parent `T1059` is shallow). |
+| **gap** | No rules reference this technique or any of its sub-techniques. |
 
 #### Configuration
 
@@ -434,10 +435,10 @@ src/detect_forge/
 ├── exit_codes.py       # CLEAN=0, RESERVED=1, GATED=2
 ├── _stubs.py           # stub_command() helper
 ├── stale/              # the staleness pipeline (real subcommand)
-├── backtest/           # stub
-├── coverage/           # stub
-├── cti/                # group + ingest stub
-└── audit/              # stub
+├── backtest/           # adversarial replay (real subcommand)
+├── coverage/           # ATT&CK coverage mapping (real subcommand)
+├── cti/                # group + ingest stub (not yet implemented)
+└── audit/              # one-step composite gate (real subcommand)
 ```
 
 ## License

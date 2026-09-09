@@ -7,7 +7,7 @@ from .._stubs import stub_command
 _INGEST_MESSAGE = (
     "detect-forge: 'cti ingest' is not yet implemented.\n"
     "Ship target: Q3-Q4 2026.\n"
-    "Track at https://github.com/Detect-Forge/detect-forge/issues"
+    "Track at https://github.com/jamesbower/Detect-Forge/issues"
 )
 
 
