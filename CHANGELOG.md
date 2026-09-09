@@ -6,6 +6,16 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [0.1.2] - 2026-09-09
+
+### Added
+- Rebuilt the bundled `backtest` Mordor corpus from the current
+  Security-Datasets: **55 techniques / 73 atomic Windows host datasets** (was 2
+  live), each with a real SHA256, size, and event count (~523k events). Restores
+  meaningful replay coverage after the upstream repo removed the old datasets.
+- Index structure-guard test so future drift (bad technique id, missing sha256,
+  non-https url) fails CI.
+
 ## [0.1.1] - 2026-09-09
 
 Backtest hotfix — the bundled corpus was unusable against the live
@@ -44,6 +54,7 @@ Initial public release.
 - Coverage/audit: empty/mistyped priority list is a loud error; sub-technique
   coverage rolls up to parents; audit honors per-subcommand config + gate flags.
 
-[Unreleased]: https://github.com/jamesbower/Detect-Forge/compare/v0.1.1...HEAD
+[Unreleased]: https://github.com/jamesbower/Detect-Forge/compare/v0.1.2...HEAD
+[0.1.2]: https://github.com/jamesbower/Detect-Forge/compare/v0.1.1...v0.1.2
 [0.1.1]: https://github.com/jamesbower/Detect-Forge/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/jamesbower/Detect-Forge/releases/tag/v0.1.0
