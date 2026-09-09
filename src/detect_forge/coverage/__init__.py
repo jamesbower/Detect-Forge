@@ -42,6 +42,8 @@ def scan_coverage(
     cache_ttl_hours: int = 24,
     no_cache: bool = False,
     priority_list: Path | None = None,
+    config_priority_list: Path | None = None,
+    config_dir: Path | None = None,
 ) -> CoverageReport:
     """Run a full coverage scan: parse rules, fetch ATT&CK, analyze.
 
@@ -56,8 +58,15 @@ def scan_coverage(
             stale. Ignored when ``no_cache`` is True.
         no_cache: When True, bypass the cache entirely and refetch the STIX
             bundle.
-        priority_list: Path to a custom priority list JSON. When None, the
-            built-in CTID default is used.
+        priority_list: Path to a custom priority list JSON passed on the CLI
+            (``--priority-list``). Highest precedence. When None, falls back to
+            the config value then the built-in CTID default.
+        config_priority_list: The ``[coverage] priority_list`` value from
+            ``.detect-forge.toml`` (may be relative). Used only when
+            ``priority_list`` is None.
+        config_dir: Directory of the discovered ``.detect-forge.toml``, used to
+            resolve a relative ``config_priority_list`` against the config
+            location rather than the current working directory.
     """
     rules = parse_rule_dir(rule_dir)
     index = build_index(
@@ -65,5 +74,9 @@ def scan_coverage(
         cache_dir=cache_dir,
         ttl_hours=0 if no_cache else cache_ttl_hours,
     )
-    priority_ids = resolve_priority_techniques(cli_path=priority_list)
+    priority_ids = resolve_priority_techniques(
+        cli_path=priority_list,
+        config_path=config_priority_list,
+        start_dir=config_dir,
+    )
     return analyze_coverage(rules, index, priority_ids)

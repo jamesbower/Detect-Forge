@@ -5,7 +5,7 @@ from pathlib import Path
 import click
 from rich.progress import Progress, SpinnerColumn, TextColumn
 
-from ..config import load_coverage_config_or_defaults
+from ..config import find_config_file, load_coverage_config_or_defaults
 from ..console import err_console
 from ..exit_codes import GATED
 from ..settings import Settings
@@ -52,7 +52,7 @@ from ..settings import Settings
 )
 @click.option(
     "--priority-list",
-    type=click.Path(exists=True, path_type=Path),
+    type=click.Path(exists=True, dir_okay=False, path_type=Path),
     default=None,
     help="Path to custom priority list JSON (overrides .detect-forge.toml)",
 )
@@ -74,11 +74,15 @@ def coverage_cmd(
     cov_cfg = load_coverage_config_or_defaults()
     effective_no_cache = no_cache or settings.no_cache
 
-    # Resolve priority list: --priority-list (CLI) > [coverage].priority_list (file) > built-in.
-    # Click's default is None, so a non-None value means the user typed --priority-list.
-    effective_priority: Path | None = priority_list
-    if effective_priority is None and cov_cfg.priority_list:
-        effective_priority = Path(cov_cfg.priority_list)
+    # Priority list precedence is applied in resolve_priority_techniques:
+    # --priority-list (CLI, relative to CWD) > [coverage].priority_list (config,
+    # relative to the config-file dir) > built-in. Keep the two sources
+    # separate so a relative config path resolves against the config location.
+    config_priority: Path | None = (
+        Path(cov_cfg.priority_list) if cov_cfg.priority_list else None
+    )
+    config_file = find_config_file()
+    config_dir: Path | None = config_file.parent if config_file is not None else None
 
     # Gating precedence: CLI --no-gate > [coverage].gate_on_priority_gaps > default True.
     effective_gate = cov_cfg.gate_on_priority_gaps
@@ -98,7 +102,9 @@ def coverage_cmd(
             cache_dir=settings.cache_dir,
             cache_ttl_hours=settings.cache_ttl_hours,
             no_cache=effective_no_cache,
-            priority_list=effective_priority,
+            priority_list=priority_list,
+            config_priority_list=config_priority,
+            config_dir=config_dir,
         )
         progress.remove_task(t)
 

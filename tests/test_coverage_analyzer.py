@@ -259,3 +259,15 @@ def test_analyze_excludes_deprecated_techniques_from_universe() -> None:
     report = analyze_coverage([], idx, priority_ids=set())
     assert {t.technique_id for t in report.techniques} == {"T1059"}
     assert report.summary.total_techniques == 1
+
+
+def test_analyze_unknown_tags_counts_rules_not_occurrences() -> None:
+    """A single rule with multiple unknown tags counts once (C6)."""
+    from detect_forge.coverage.analyzer import analyze_coverage
+
+    idx = _make_index(
+        ("T1059", "PowerShell Family", False, ["execution"], False, False, None),
+    )
+    rule = _make_rule(["T9999", "T8888"])  # two unknown IDs, one rule
+    report = analyze_coverage([rule], idx, priority_ids=set())
+    assert report.summary.rules_with_unknown_tags == 1

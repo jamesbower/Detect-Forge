@@ -155,3 +155,41 @@ def test_cli_config_file_gate_off_suppresses_exit_two(
     runner = CliRunner()
     result = runner.invoke(main, ["coverage", str(empty_rule_dir)])
     assert result.exit_code == 0, result.stderr
+
+
+def test_cli_passes_config_priority_relative_to_config_dir(
+    mocker: MockerFixture, monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    """A relative [coverage] priority_list resolves against the config-file dir (C4)."""
+    monkeypatch.delenv("XDG_CACHE_HOME", raising=False)
+    cfgdir = tmp_path / "proj"
+    cfgdir.mkdir()
+    (cfgdir / ".detect-forge.toml").write_text('[coverage]\npriority_list = "ci/p.json"\n')
+    rules = cfgdir / "rules"
+    rules.mkdir()
+    monkeypatch.chdir(cfgdir)
+    spy = mocker.patch(
+        "detect_forge.coverage.scan_coverage", return_value=_fake_report()
+    )
+    runner = CliRunner()
+    result = runner.invoke(main, ["coverage", str(rules)])
+    assert result.exit_code == 0, result.stderr
+    kwargs = spy.call_args.kwargs
+    assert kwargs["config_priority_list"] == Path("ci/p.json")
+    assert kwargs["config_dir"] == cfgdir
+
+
+def test_cli_priority_list_directory_rejected(
+    empty_rule_dir: Path, mocker: MockerFixture, monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    """--priority-list pointed at a directory is a clean usage error, not a traceback (C7)."""
+    monkeypatch.delenv("XDG_CACHE_HOME", raising=False)
+    mocker.patch("detect_forge.coverage.scan_coverage", return_value=_fake_report())
+    a_dir = tmp_path / "adir"
+    a_dir.mkdir()
+    runner = CliRunner()
+    result = runner.invoke(
+        main, ["coverage", str(empty_rule_dir), "--priority-list", str(a_dir)]
+    )
+    assert result.exit_code == 2
+    assert "directory" in result.output.lower()

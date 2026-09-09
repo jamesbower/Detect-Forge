@@ -36,14 +36,16 @@ def analyze_coverage(
     # technique_id → list[(rule, exact_match: bool)]
     tag_to_rules: dict[str, list[tuple[DetectionRule, bool]]] = defaultdict(list)
     migrations: list[MigrationItem] = []
-    unknown_count = 0
+    # Count distinct rules with >=1 unknown tag, not raw tag occurrences, so the
+    # field can't exceed rules_parsed.
+    rules_with_unknown: set[str] = set()
 
     for rule in rules:
         for tid in rule.technique_ids:
             tech = index.techniques.get(tid)
 
             if tech is None:
-                unknown_count += 1
+                rules_with_unknown.add(str(rule.source_file))
                 continue
 
             if tech.deprecated or tech.revoked:
@@ -106,7 +108,7 @@ def analyze_coverage(
     summary = _build_summary(
         techniques=techniques,
         migrations=migrations,
-        unknown_count=unknown_count,
+        unknown_count=len(rules_with_unknown),
         rules_parsed=len(rules),
         index=index,
     )
