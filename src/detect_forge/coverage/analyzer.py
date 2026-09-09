@@ -59,10 +59,14 @@ def analyze_coverage(
             # Exact-match against the technique that's tagged.
             tag_to_rules[tid].append((rule, True))
 
-            # Propagate parent → sub-techniques as shallow coverage.
             if not tech.is_subtechnique:
+                # Propagate parent → sub-techniques as shallow coverage.
                 for sub_tid in index.subtechniques_of(tid):
                     tag_to_rules[sub_tid].append((rule, False))  # shallow
+            elif tech.parent_id:
+                # Roll a covered sub-technique up to its parent as shallow
+                # coverage so a covered parent isn't reported as a false gap.
+                tag_to_rules[tech.parent_id].append((rule, False))  # shallow
 
     # ---- Pass 2: walk the in-scope universe, assign state ----
     techniques: list[TechniqueCoverage] = []

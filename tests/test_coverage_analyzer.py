@@ -83,7 +83,24 @@ def test_analyze_exact_subtechnique_match_marks_full() -> None:
     assert sub.state == "full"
     assert sub.rule_count == 1
     parent = next(t for t in report.techniques if t.technique_id == "T1059")
-    assert parent.state == "gap"  # parent itself isn't tagged
+    # Parent isn't tagged directly, but a covered sub-technique rolls it up to
+    # shallow (covered-via-sub) rather than a false gap (C3).
+    assert parent.state == "shallow"
+
+
+def test_analyze_subtechnique_coverage_rolls_up_to_parent() -> None:
+    from detect_forge.coverage.analyzer import analyze_coverage
+
+    idx = _make_index(
+        ("T1059", "PowerShell Family", False, ["execution"], False, False, None),
+        ("T1059.001", "PowerShell", True, ["execution"], False, False, None),
+    )
+    rule = _make_rule(["T1059.001"])
+    report = analyze_coverage([rule], idx, priority_ids={"T1059"})
+    parent = next(t for t in report.techniques if t.technique_id == "T1059")
+    assert parent.state == "shallow"           # covered via sub, not a gap
+    assert parent.rule_count == 1
+    assert report.summary.priority_gap == 0     # priority parent no longer false-gaps
 
 
 def test_analyze_parent_tag_marks_subtechniques_shallow() -> None:
@@ -226,8 +243,9 @@ def test_analyze_tactic_rollup_sums_per_tactic() -> None:
     exec_rollup = by_id["TA0002"]
     assert exec_rollup.total_techniques == 2
     assert exec_rollup.full_count == 1
-    assert exec_rollup.shallow_count == 0  # parent T1059 isn't tagged
-    assert exec_rollup.gap_count == 1  # T1059 itself uncovered
+    # Parent T1059 rolls up to shallow via its covered sub-technique (C3).
+    assert exec_rollup.shallow_count == 1
+    assert exec_rollup.gap_count == 0
 
 
 def test_analyze_excludes_deprecated_techniques_from_universe() -> None:
