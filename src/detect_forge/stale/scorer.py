@@ -82,14 +82,16 @@ def _score_technique(
     technique_date = tech.modified.date()
 
     if rule_effective_date is None:
-        days_stale = (today - technique_date).days
+        # "We don't know the rule's date" must not be conflated with "the rule
+        # is dangerously stale". Emit an informational (non-gating) finding and
+        # do NOT derive staleness from the technique's age.
         return TechniqueFinding(
             technique_id=technique_id,
             technique_name=tech.name,
             technique_modified=tech.modified,
             rule_effective_date=None,
-            days_stale=days_stale,
-            severity=_severity(days_stale),
+            days_stale=0,
+            severity="low",
             kind="no_rule_date",
         )
 

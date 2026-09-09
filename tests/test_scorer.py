@@ -134,12 +134,24 @@ def test_deprecated_technique_returns_high() -> None:
     assert score.findings[0].severity == "high"
 
 
-def test_no_rule_date_scores_conservatively() -> None:
+def test_no_rule_date_is_informational_not_gating() -> None:
+    # An undated rule means "we don't know the rule's date" — that must NOT be
+    # conflated with "the rule is dangerously stale" (which would gate CI).
     rule = _make_rule(["T1059"])  # no dates
     index = _make_index_with(_make_technique("T1059", days_ago=200))
     score = score_rule(rule, index)
     assert score.findings[0].kind == "no_rule_date"
-    assert score.worst_days_stale >= 200
+    assert score.findings[0].severity == "low"
+    assert score.worst_severity == "low"
+    assert score.worst_days_stale == 0
+
+
+def test_no_rule_date_does_not_gate_even_for_ancient_technique() -> None:
+    rule = _make_rule(["T1059"])  # no dates
+    index = _make_index_with(_make_technique("T1059", days_ago=4000))
+    report = score_rules([rule], index)
+    assert report.has_severity("critical") is False
+    assert report.summary.critical == 0
 
 
 def test_modified_date_preferred_over_rule_date() -> None:
