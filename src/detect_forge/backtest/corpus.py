@@ -28,6 +28,17 @@ log = logging.getLogger(__name__)
 
 INDEX_FILENAME = "mordor_index.json"
 
+# Guards against zip-bombs / runaway payloads on network-fetched datasets.
+MAX_DOWNLOAD_BYTES = 512 * 1024 * 1024
+MAX_MEMBER_BYTES = 512 * 1024 * 1024
+
+
+def _reject_unsafe_path(fragment: str) -> None:
+    """Raise if a path fragment could escape its base dir (``..`` or absolute)."""
+    p = Path(fragment)
+    if p.is_absolute() or ".." in p.parts:
+        raise ValueError(f"Refusing unsafe dataset path fragment: {fragment!r}")
+
 
 class MordorDataset(BaseModel):
     """One Mordor dataset's metadata + parsed event list."""
@@ -149,22 +160,28 @@ class MordorCorpus:
         log.debug("Fetching Mordor dataset: %s", url)
         response = requests.get(url, timeout=60)
         response.raise_for_status()
-        events = self._extract_events_from_zip(response.content)
+        content = response.content
+        if len(content) > MAX_DOWNLOAD_BYTES:
+            raise ValueError(
+                f"Dataset {entry['dataset_id']} download exceeds "
+                f"{MAX_DOWNLOAD_BYTES} bytes; refusing"
+            )
+        # Verify integrity BEFORE extracting or caching. A mismatch means the
+        # payload is not what the index vouched for — drop it, don't use it.
         expected_sha = entry.get("sha256", "")
         if expected_sha:
-            actual = hashlib.sha256(response.content).hexdigest()
+            actual = hashlib.sha256(content).hexdigest()
             if actual != expected_sha:
-                log.warning(
-                    "SHA256 mismatch for %s: index=%s actual=%s",
-                    entry["dataset_id"],
-                    expected_sha,
-                    actual,
+                raise ValueError(
+                    f"SHA256 mismatch for {entry['dataset_id']}: "
+                    f"index={expected_sha} actual={actual}"
                 )
         else:
             log.debug(
                 "SHA256 not populated for %s; skipping verification",
                 entry["dataset_id"],
             )
+        events = self._extract_events_from_zip(content)
         cache_path.parent.mkdir(parents=True, exist_ok=True)
         cache_path.write_text(json.dumps(events), encoding="utf-8")
         return events
@@ -178,26 +195,52 @@ class MordorCorpus:
         3. Recursive search for ``<dataset_id>.zip`` anywhere under override
         """
         assert self._source_override is not None  # noqa: S101
+        base = self._source_override.resolve()
         dataset_id = entry["dataset_id"]
+        _reject_unsafe_path(dataset_id)
         candidate = self._source_override / f"{dataset_id}.zip"
         if not candidate.is_file():
             # Fall back to URL-path-derived layout.
             url_path = entry["url"].split("//", 1)[-1].split("/", 1)[-1]
+            _reject_unsafe_path(url_path)
             candidate = self._source_override / url_path
         if not candidate.is_file():
-            # Last resort: recursive search by dataset_id.
-            matches = list(self._source_override.rglob(f"{dataset_id}.zip"))
+            # Last resort: recursive search by dataset_id, constrained to the
+            # override dir.
+            matches = [
+                m
+                for m in self._source_override.rglob(f"{dataset_id}.zip")
+                if m.resolve().is_relative_to(base)
+            ]
             if matches:
                 candidate = matches[0]
+        if not candidate.resolve().is_relative_to(base):
+            raise ValueError(
+                f"Refusing to read dataset outside override dir: {candidate}"
+            )
         return self._extract_events_from_zip(candidate.read_bytes())
 
     def _extract_events_from_zip(self, blob: bytes) -> list[dict[str, Any]]:
+        events: list[dict[str, Any]] = []
+        found_list = False
         with zipfile.ZipFile(io.BytesIO(blob)) as zf:
             json_names = [n for n in zf.namelist() if n.endswith(".json")]
             if not json_names:
                 raise ValueError("ZIP archive contains no .json file")
-            with zf.open(json_names[0]) as f:
-                data = json.loads(f.read().decode("utf-8"))
-        if not isinstance(data, list):
-            raise ValueError("Mordor dataset JSON must be a list of events")
-        return data
+            for name in json_names:
+                info = zf.getinfo(name)
+                if info.file_size > MAX_MEMBER_BYTES:
+                    raise ValueError(
+                        f"ZIP member {name} decompresses to {info.file_size} bytes "
+                        f"(> {MAX_MEMBER_BYTES}); refusing (possible zip bomb)"
+                    )
+                with zf.open(name) as f:
+                    data = json.loads(f.read().decode("utf-8"))
+                # A dataset ZIP may carry metadata objects alongside the event
+                # list; take every list-shaped member and skip the rest.
+                if isinstance(data, list):
+                    found_list = True
+                    events.extend(data)
+        if not found_list:
+            raise ValueError("Mordor dataset JSON must contain a list of events")
+        return events

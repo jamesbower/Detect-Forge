@@ -1,9 +1,14 @@
 from __future__ import annotations
 
+import hashlib
+import io
 import json
 import shutil
+import zipfile
 from pathlib import Path
+from typing import Any
 
+import pytest
 import requests_mock as rm_lib
 
 FIXTURE_DIR = Path(__file__).parent / "fixtures" / "backtest"
@@ -11,6 +16,15 @@ FIXTURE_DIR = Path(__file__).parent / "fixtures" / "backtest"
 
 def _load_synthetic_zip_bytes() -> bytes:
     return (FIXTURE_DIR / "synthetic_dataset.zip").read_bytes()
+
+
+def _zip_of(members: dict[str, Any]) -> bytes:
+    """Build an in-memory ZIP whose members map name -> JSON-serialisable payload."""
+    buf = io.BytesIO()
+    with zipfile.ZipFile(buf, "w") as zf:
+        for name, payload in members.items():
+            zf.writestr(name, json.dumps(payload))
+    return buf.getvalue()
 
 
 def test_corpus_loads_builtin_index() -> None:
@@ -165,3 +179,74 @@ def test_corpus_returns_empty_for_filtered_technique(tmp_path: Path) -> None:
     )
     assert corpus.datasets_for("T1059.001") == []
     assert corpus.datasets_consulted() == 0
+
+
+# --------------------------------------------------------------------------
+# Task 6: SHA enforcement, size caps, path safety, all-json-members (S1,S2,S3,S6)
+# --------------------------------------------------------------------------
+
+
+def _index_with_sha(url: str, sha: str) -> dict[str, Any]:
+    return {
+        "datasets": {
+            "T1059": [
+                {"dataset_id": "d1", "platform": "windows", "url": url, "sha256": sha}
+            ]
+        }
+    }
+
+
+def test_corpus_sha_mismatch_is_dropped_and_not_cached(
+    tmp_path: Path, requests_mock: rm_lib.Mocker
+) -> None:
+    from detect_forge.backtest.corpus import MordorCorpus
+
+    blob = _zip_of({"events.json": [{"a": 1}]})
+    requests_mock.get("https://example.invalid/ds.zip", content=blob)
+    idx = _index_with_sha("https://example.invalid/ds.zip", "deadbeef" * 8)
+    corpus = MordorCorpus(cache_dir=tmp_path, index_override=idx)
+    # datasets_for swallows the per-dataset failure and returns [].
+    assert corpus.datasets_for("T1059") == []
+    cached = tmp_path / "security-datasets" / "datasets" / "T1059" / "d1.json"
+    assert not cached.exists()  # tampered payload must not be cached
+
+
+def test_corpus_sha_match_loads_and_caches(
+    tmp_path: Path, requests_mock: rm_lib.Mocker
+) -> None:
+    from detect_forge.backtest.corpus import MordorCorpus
+
+    payload = [{"a": 1}, {"b": 2}]
+    blob = _zip_of({"events.json": payload})
+    sha = hashlib.sha256(blob).hexdigest()
+    requests_mock.get("https://example.invalid/ds.zip", content=blob)
+    idx = _index_with_sha("https://example.invalid/ds.zip", sha)
+    corpus = MordorCorpus(cache_dir=tmp_path, index_override=idx)
+    datasets = corpus.datasets_for("T1059")
+    assert datasets and datasets[0].events == payload
+    assert (tmp_path / "security-datasets" / "datasets" / "T1059" / "d1.json").is_file()
+
+
+def test_corpus_reads_all_json_members(
+    tmp_path: Path, requests_mock: rm_lib.Mocker
+) -> None:
+    from detect_forge.backtest.corpus import MordorCorpus
+
+    blob = _zip_of({"part1.json": [{"a": 1}], "part2.json": [{"b": 2}]})
+    requests_mock.get("https://example.invalid/ds.zip", content=blob)
+    idx = _index_with_sha("https://example.invalid/ds.zip", "")
+    corpus = MordorCorpus(cache_dir=tmp_path, index_override=idx)
+    datasets = corpus.datasets_for("T1059")
+    assert datasets and len(datasets[0].events) == 2
+
+
+def test_corpus_local_override_rejects_path_escape(tmp_path: Path) -> None:
+    from detect_forge.backtest.corpus import MordorCorpus
+
+    src = tmp_path / "checkout"
+    src.mkdir()
+    (src / "index.json").write_text(json.dumps({"datasets": {}}))
+    corpus = MordorCorpus(cache_dir=tmp_path, source_override=src)
+    entry = {"dataset_id": "../../etc/evil", "platform": "windows", "url": "https://x/y.zip"}
+    with pytest.raises(ValueError, match="unsafe|outside|escape"):
+        corpus._load_from_local_override(entry)  # noqa: SLF001
