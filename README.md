@@ -3,7 +3,7 @@
 [![PyPI](https://img.shields.io/pypi/v/detect-forge.svg)](https://pypi.org/project/detect-forge/)
 [![CI](https://github.com/jamesbower/Detect-Forge/actions/workflows/ci.yml/badge.svg)](https://github.com/jamesbower/Detect-Forge/actions/workflows/ci.yml)
 
-**Your detection rules pass CI. Do they still work?**
+**Validate your detection rules — not just that they fire, but that they still catch what they claim.**
 
 Open-source AI toolkit that scores, backtests, and gates Sigma/Elastic rules against real attack telemetry — one install, one config, one CI step, nothing leaves your environment.
 
