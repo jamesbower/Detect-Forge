@@ -65,21 +65,21 @@ class SigmaMatcher:
         detection = parsed.get("detection")
         if not isinstance(detection, dict):
             return False, "Sigma rule has no detection block"
-        # Reject unsupported modifiers + keywords.
+        # A non-correlation rule with no usable condition can never be
+        # evaluated deterministically — treat as unsupported rather than
+        # letting the condition parser crash (swallowed → false silent).
+        if "correlation" not in parsed and not str(detection.get("condition", "")).strip():
+            return False, "Sigma rule has empty or missing condition"
+        # Reject unsupported modifiers + keywords. Modifier checks must also
+        # descend into list-form selections (a YAML list of field maps).
         for sel_name, sel_value in detection.items():
             if sel_name == "condition":
                 continue
             if sel_name == "keywords":
                 return False, "Sigma uses unfielded keywords"
-            if isinstance(sel_value, dict):
-                for field_key in sel_value:
-                    if "|" in field_key:
-                        parts = field_key.split("|")[1:]
-                        for modifier in parts:
-                            if modifier in _UNSUPPORTED_MODIFIERS:
-                                return False, f"Sigma uses unsupported modifier: |{modifier}"
-                            if modifier not in _SUPPORTED_MODIFIERS:
-                                return False, f"unsupported modifier: {modifier}"
+            err = _selection_modifier_error(sel_value)
+            if err is not None:
+                return False, err
         return True, None
 
     def match(
@@ -289,10 +289,41 @@ class SigmaMatcher:
         return fires
 
 
+# ---------- support checks ----------
+
+def _selection_modifier_error(sel_value: Any) -> str | None:
+    """Return an error reason if a selection uses an unsupported modifier, else None.
+
+    Descends into list-form selections (a YAML list of field maps) so an
+    unsupported modifier can't hide behind list syntax and slip past
+    ``support_reason``.
+    """
+    if isinstance(sel_value, list):
+        for item in sel_value:
+            err = _selection_modifier_error(item)
+            if err is not None:
+                return err
+        return None
+    if not isinstance(sel_value, dict):
+        return None
+    for field_key in sel_value:
+        if "|" not in field_key:
+            continue
+        for modifier in field_key.split("|")[1:]:
+            if modifier in _UNSUPPORTED_MODIFIERS:
+                return f"Sigma uses unsupported modifier: |{modifier}"
+            if modifier not in _SUPPORTED_MODIFIERS:
+                return f"unsupported modifier: {modifier}"
+    return None
+
+
 # ---------- selection evaluation ----------
 
 def _evaluate_selection(selection: Any, event: dict[str, Any]) -> bool:
     """A selection is a mapping of field_spec → value(s). All entries must match (AND)."""
+    if not isinstance(event, dict):
+        # Malformed dataset element (not a JSON object) — cannot match.
+        return False
     if isinstance(selection, list):
         # List-form selection means OR over the entries.
         return any(_evaluate_selection(s, event) for s in selection)
@@ -572,6 +603,8 @@ def _event_timestamp(event: dict[str, Any]) -> float | None:
 
     Handles int/float epoch values and ISO-8601 strings (including trailing 'Z').
     """
+    if not isinstance(event, dict):
+        return None
     for field in ("@timestamp", "TimeCreated", "timestamp", "Timestamp"):
         v = event.get(field)
         if v is None:

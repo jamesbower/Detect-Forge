@@ -756,3 +756,38 @@ def test_sigma_n_of_selection_glob() -> None:
     assert _fires(y, [{"A": "1", "B": "1"}])       # 2 match
     assert _fires(y, [{"A": "1", "B": "1", "C": "1"}])  # 3 match
     assert not _fires(y, [{"A": "1"}])             # only 1
+
+
+# --------------------------------------------------------------------------
+# Task 4: route genuinely-unsupported constructs to unsupported (M8, M10, M11)
+# --------------------------------------------------------------------------
+
+
+def _supported(yaml_text: str) -> bool:
+    from detect_forge.backtest.matchers.sigma import SigmaMatcher
+
+    return SigmaMatcher().support_reason(_rule_from_yaml(yaml_text))[0]
+
+
+def test_sigma_listform_unsupported_modifier_routes_unsupported() -> None:
+    # An unsupported modifier hidden inside a list-form selection must be
+    # rejected at supports(), not silently mismatched at match time.
+    y = "detection:\n  selection:\n    - IP|cidr: '10.0.0.0/8'\n  condition: selection\n"
+    assert _supported(y) is False
+
+
+def test_sigma_empty_condition_unsupported() -> None:
+    y = "detection:\n  selection:\n    A: '1'\n  condition: ''\n"
+    assert _supported(y) is False
+
+
+def test_sigma_missing_condition_unsupported() -> None:
+    y = "detection:\n  selection:\n    A: '1'\n"
+    assert _supported(y) is False
+
+
+def test_sigma_non_dict_events_do_not_crash() -> None:
+    from detect_forge.backtest.matchers.sigma import SigmaMatcher
+
+    y = "detection:\n  selection:\n    A: '1'\n  condition: selection\n"
+    assert SigmaMatcher().match(_rule_from_yaml(y), ["junk", 5], "ds") == []
