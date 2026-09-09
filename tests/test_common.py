@@ -23,6 +23,23 @@ def test_common_output_options_adds_three_flags() -> None:
     assert "--min-severity" in result.output
 
 
+def test_common_output_options_accepts_info_min_severity() -> None:
+    # info findings (no_attack_tags / unknown_technique) must be selectable,
+    # otherwise they can never be displayed.
+    @click.command()
+    @common_output_options
+    def cmd(output_format: str, output: str | None, min_severity: str) -> None:
+        click.echo(min_severity)
+
+    runner = CliRunner()
+    ok = runner.invoke(cmd, ["--min-severity", "info"])
+    assert ok.exit_code == 0
+    assert ok.output.strip() == "info"
+
+    bad = runner.invoke(cmd, ["--min-severity", "bogus"])
+    assert bad.exit_code != 0
+
+
 def test_common_output_options_defaults() -> None:
     @click.command()
     @common_output_options

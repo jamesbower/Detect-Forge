@@ -15,14 +15,15 @@ def common_output_options[F: Callable[..., Any]](func: F) -> F:
 
     - ``--format`` (choice: terminal | json | html, default terminal)
     - ``--output / -o`` (Path, default None)
-    - ``--min-severity`` (choice: low | medium | high | critical, default low)
+    - ``--min-severity`` (choice: info | low | medium | high | critical, default low)
     """
     func = click.option(
         "--min-severity",
-        type=click.Choice(["low", "medium", "high", "critical"]),
+        type=click.Choice(["info", "low", "medium", "high", "critical"]),
         default="low",
         show_default=True,
-        help="Only show rules at or above this severity",
+        help="Only show rules at or above this severity (info surfaces "
+        "no-ATT&CK-tag and unknown-technique findings)",
     )(func)
     func = click.option(
         "--output",
