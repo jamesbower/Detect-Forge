@@ -65,6 +65,8 @@ dev = [
     "mypy>=1.8",
     "ruff>=0.3",
     "types-requests>=2.31",
+    "build>=1.0",
+    "twine>=5",
 ]
 
 [tool.hatch.build.targets.wheel]
