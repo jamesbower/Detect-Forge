@@ -40,6 +40,44 @@ def _reject_unsafe_path(fragment: str) -> None:
         raise ValueError(f"Refusing unsafe dataset path fragment: {fragment!r}")
 
 
+def _parse_events_member(raw: str) -> tuple[list[dict[str, Any]], bool]:
+    """Parse one ``.json`` ZIP member into a list of event dicts.
+
+    Handles three shapes: a JSON array of events, a single JSON object, and
+    **JSON Lines** (one JSON object per line) — the on-disk format used by the
+    Security-Datasets (Mordor) corpus. Blank lines and unparseable lines are
+    skipped. Returns ``(events, recognized)`` where ``recognized`` is False only
+    for content that isn't event data at all (empty, or a bare scalar), so the
+    caller can tell "no events here" from "this wasn't a dataset member".
+    """
+    raw = raw.strip()
+    if not raw:
+        return [], False
+    try:
+        data = json.loads(raw)
+    except json.JSONDecodeError:
+        # JSON Lines: parse each non-empty line independently.
+        events: list[dict[str, Any]] = []
+        recognized = False
+        for line in raw.splitlines():
+            line = line.strip()
+            if not line:
+                continue
+            try:
+                obj = json.loads(line)
+            except json.JSONDecodeError:
+                continue
+            recognized = True
+            if isinstance(obj, dict):
+                events.append(obj)
+        return events, recognized
+    if isinstance(data, list):
+        return [e for e in data if isinstance(e, dict)], True
+    if isinstance(data, dict):
+        return [data], True
+    return [], False
+
+
 class MordorDataset(BaseModel):
     """One Mordor dataset's metadata + parsed event list."""
 
@@ -222,7 +260,7 @@ class MordorCorpus:
 
     def _extract_events_from_zip(self, blob: bytes) -> list[dict[str, Any]]:
         events: list[dict[str, Any]] = []
-        found_list = False
+        recognized_any = False
         with zipfile.ZipFile(io.BytesIO(blob)) as zf:
             json_names = [n for n in zf.namelist() if n.endswith(".json")]
             if not json_names:
@@ -235,12 +273,12 @@ class MordorCorpus:
                         f"(> {MAX_MEMBER_BYTES}); refusing (possible zip bomb)"
                     )
                 with zf.open(name) as f:
-                    data = json.loads(f.read().decode("utf-8"))
-                # A dataset ZIP may carry metadata objects alongside the event
-                # list; take every list-shaped member and skip the rest.
-                if isinstance(data, list):
-                    found_list = True
-                    events.extend(data)
-        if not found_list:
-            raise ValueError("Mordor dataset JSON must contain a list of events")
+                    member_events, recognized = _parse_events_member(
+                        f.read().decode("utf-8", "replace")
+                    )
+                if recognized:
+                    recognized_any = True
+                    events.extend(member_events)
+        if not recognized_any:
+            raise ValueError("Mordor dataset ZIP contained no parseable JSON events")
         return events

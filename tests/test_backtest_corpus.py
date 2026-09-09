@@ -240,6 +240,41 @@ def test_corpus_reads_all_json_members(
     assert datasets and len(datasets[0].events) == 2
 
 
+def test_corpus_reads_jsonl_member(
+    tmp_path: Path, requests_mock: rm_lib.Mocker
+) -> None:
+    """Security-Datasets store events as JSON Lines (one object per line), not a
+    JSON array — the loader must parse that, else every real dataset fails."""
+    from detect_forge.backtest.corpus import MordorCorpus
+
+    jsonl = "\n".join(json.dumps({"EventID": 5158, "n": i}) for i in range(3))
+    buf = io.BytesIO()
+    with zipfile.ZipFile(buf, "w") as zf:
+        zf.writestr("events_2020-09-04.json", jsonl)
+    requests_mock.get("https://example.invalid/ds.zip", content=buf.getvalue())
+    idx = _index_with_sha("https://example.invalid/ds.zip", "")
+    corpus = MordorCorpus(cache_dir=tmp_path, index_override=idx)
+    datasets = corpus.datasets_for("T1059")
+    assert datasets and len(datasets[0].events) == 3
+    assert datasets[0].events[0]["EventID"] == 5158
+
+
+def test_corpus_jsonl_skips_blank_and_bad_lines(
+    tmp_path: Path, requests_mock: rm_lib.Mocker
+) -> None:
+    from detect_forge.backtest.corpus import MordorCorpus
+
+    content = '{"a": 1}\n\n   \nnot json\n{"a": 2}\n'
+    buf = io.BytesIO()
+    with zipfile.ZipFile(buf, "w") as zf:
+        zf.writestr("events.json", content)
+    requests_mock.get("https://example.invalid/ds.zip", content=buf.getvalue())
+    idx = _index_with_sha("https://example.invalid/ds.zip", "")
+    corpus = MordorCorpus(cache_dir=tmp_path, index_override=idx)
+    datasets = corpus.datasets_for("T1059")
+    assert datasets and [e["a"] for e in datasets[0].events] == [1, 2]
+
+
 def test_corpus_local_override_rejects_path_escape(tmp_path: Path) -> None:
     from detect_forge.backtest.corpus import MordorCorpus
 
