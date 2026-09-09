@@ -3,11 +3,9 @@
 [![PyPI](https://img.shields.io/pypi/v/detect-forge.svg)](https://pypi.org/project/detect-forge/)
 [![CI](https://github.com/jamesbower/Detect-Forge/actions/workflows/ci.yml/badge.svg)](https://github.com/jamesbower/Detect-Forge/actions/workflows/ci.yml)
 
-**AI-native detection-engineering toolkit. One install, one config, one CI step.**
+**Your detection rules pass CI. Do they still work?**
 
-Detect-Forge scores, maps, and stress-tests your Sigma (YAML) and Elastic (TOML) detection
-rules against MITRE ATT&CK — then fails your CI when something needs attention. No platform,
-no sign-up, no data leaves your environment.
+Open-source AI toolkit that scores, backtests, and gates Sigma/Elastic rules against real attack telemetry — one install, one config, one CI step, nothing leaves your environment.
 
 ```bash
 pip install detect-forge
