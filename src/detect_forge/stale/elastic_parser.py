@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+import re
 import tomllib
 from pathlib import Path
 from typing import Any
@@ -11,6 +12,10 @@ from ._dates import _parse_rule_date
 from .models import DetectionRule
 
 log = logging.getLogger(__name__)
+
+# Strict ATT&CK technique ID (parity with the Sigma parser): T#### optionally
+# followed by a .### sub-technique. Rejects tactic IDs (TA####) and junk.
+_TECHNIQUE_ID = re.compile(r"^T\d{4}(?:\.\d{3})?$")
 
 
 def _extract_elastic_technique_ids(threats: list[Any]) -> list[str]:
@@ -30,7 +35,7 @@ def _extract_elastic_technique_ids(threats: list[Any]) -> list[str]:
             if not isinstance(tech, dict):
                 continue
             tech_id = tech.get("id")
-            if isinstance(tech_id, str) and tech_id.upper().startswith("T"):
+            if isinstance(tech_id, str) and _TECHNIQUE_ID.match(tech_id.upper()):
                 ids.append(tech_id.upper())
             subtechniques = tech.get("subtechnique", []) or []
             if not isinstance(subtechniques, list):
@@ -39,7 +44,7 @@ def _extract_elastic_technique_ids(threats: list[Any]) -> list[str]:
                 if not isinstance(sub, dict):
                     continue
                 sub_id = sub.get("id")
-                if isinstance(sub_id, str) and sub_id.upper().startswith("T"):
+                if isinstance(sub_id, str) and _TECHNIQUE_ID.match(sub_id.upper()):
                     ids.append(sub_id.upper())
     return ids
 

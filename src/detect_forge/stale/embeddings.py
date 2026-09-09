@@ -75,8 +75,15 @@ def rule_text_hash(text: str) -> str:
 
 
 def stix_bundle_hash(cache_dir: Path, domain: str) -> str:
-    """First 8 hex chars of SHA256(stix-bundle-file). Used in technique cache filenames."""
+    """First 8 hex chars of SHA256(stix-bundle-file). Used in technique cache filenames.
+
+    Returns the sentinel ``"nobundle"`` when the bundle is not on disk (e.g. a
+    direct ``score_rules`` caller that passed a cache_dir without pre-fetching)
+    so callers get a stable cache key instead of a FileNotFoundError.
+    """
     bundle = cache_dir / f"{domain}.json"
+    if not bundle.is_file():
+        return "nobundle"
     h = hashlib.sha256(bundle.read_bytes()).hexdigest()
     return h[:8]
 

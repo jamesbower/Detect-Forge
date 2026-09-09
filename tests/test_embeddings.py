@@ -127,3 +127,11 @@ def test_embedding_model_embed_batch_calls_fastembed(mocker: MockerFixture) -> N
     # cleanly through pydantic + JSON.
     assert isinstance(result[0], list)
     assert isinstance(result[0][0], float)
+
+
+def test_stix_bundle_hash_missing_bundle_does_not_raise(tmp_path: Path) -> None:
+    """A direct caller with no cached bundle must not get a FileNotFoundError — T7."""
+    from detect_forge.stale.embeddings import stix_bundle_hash
+
+    h = stix_bundle_hash(tmp_path, "enterprise-attack")
+    assert isinstance(h, str) and h

@@ -167,3 +167,13 @@ def test_scalar_threat_does_not_crash(tmp_path: Path) -> None:
     rule = parse_rule_file(f)
     assert rule is not None
     assert rule.technique_ids == []
+
+
+def test_elastic_rejects_non_technique_ids() -> None:
+    """Only strict T#### / T####.### IDs are accepted (parity with Sigma) — T6."""
+    assert _extract_elastic_technique_ids([{"technique": [{"id": "TA0001"}]}]) == []
+    assert _extract_elastic_technique_ids([{"technique": [{"id": "TACOS"}]}]) == []
+    assert _extract_elastic_technique_ids([{"technique": [{"id": "T1059"}]}]) == ["T1059"]
+    assert _extract_elastic_technique_ids(
+        [{"technique": [{"id": "T1059", "subtechnique": [{"id": "T1059.001"}]}]}]
+    ) == ["T1059", "T1059.001"]

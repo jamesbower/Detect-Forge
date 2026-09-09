@@ -66,6 +66,11 @@ def stale_cmd(
         effective_threshold = semantic_threshold
     if cfg.semantic_threshold is not None:
         effective_threshold = cfg.semantic_threshold
+    if not -1.0 <= effective_threshold <= 1.0:
+        raise click.BadParameter(
+            f"semantic threshold must be in [-1, 1] (cosine range); got {effective_threshold}",
+            param_hint="--semantic-threshold",
+        )
 
     with Progress(
         SpinnerColumn(),

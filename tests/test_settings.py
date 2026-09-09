@@ -34,3 +34,17 @@ def test_env_prefix_overrides_attack_domain(monkeypatch: pytest.MonkeyPatch) -> 
     monkeypatch.setenv("DETECT_FORGE_ATTACK_DOMAIN", "ics-attack")
     s = Settings()
     assert s.attack_domain == "ics-attack"
+
+
+def test_semantic_threshold_out_of_range_rejected(monkeypatch: pytest.MonkeyPatch) -> None:
+    """DETECT_FORGE_SEMANTIC_THRESHOLD outside the cosine range [-1, 1] is rejected."""
+    from pydantic import ValidationError
+
+    monkeypatch.setenv("DETECT_FORGE_SEMANTIC_THRESHOLD", "5")
+    with pytest.raises(ValidationError):
+        Settings()
+
+
+def test_semantic_threshold_in_range_accepted(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("DETECT_FORGE_SEMANTIC_THRESHOLD", "0.7")
+    assert Settings().semantic_threshold == 0.7
