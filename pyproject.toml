@@ -5,7 +5,7 @@ build-backend = "hatchling.build"
 [project]
 name = "detect-forge"
 version = "0.1.0"
-description = "Detection engineering toolkit. One install, one config, one CI step."
+description = "AI Native Detection engineering toolkit. One install, one config, one CI step."
 readme = "README.md"
 license = { text = "MIT" }
 requires-python = ">=3.12"
@@ -25,9 +25,9 @@ dependencies = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/Detect-Forge/detect-forge"
-Repository = "https://github.com/Detect-Forge/detect-forge"
-Issues = "https://github.com/Detect-Forge/detect-forge/issues"
+Homepage = "https://github.com/jamesbower/detect-forge"
+Repository = "https://github.com/jamesbower/detect-forge"
+Issues = "https://github.com/jamesbower/detect-forge/issues"
 
 [project.scripts]
 detect-forge = "detect_forge.cli:main"
