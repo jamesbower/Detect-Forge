@@ -77,6 +77,7 @@ class ElasticMatcher:
         rule: DetectionRule,
         events: list[dict[str, Any]],
         dataset_id: str,
+        technique_id: str | None = None,
     ) -> list[FireRecord]:
         """Evaluate the rule query against *events* and return fire records.
 
@@ -95,15 +96,18 @@ class ElasticMatcher:
             return []
 
         assert rule.raw_toml is not None  # guarded by supports()
+        tech = technique_id if technique_id is not None else (
+            rule.technique_ids[0] if rule.technique_ids else ""
+        )
         parsed_toml = tomllib.loads(rule.raw_toml)
         rule_block = parsed_toml.get("rule", {})
-        language = rule_block.get("language", "").lower()
+        language = rule_block.get("language", "").lower() or "kuery"
         query = rule_block.get("query", "").strip()
 
         if language == "eql":
-            return self._match_eql(rule, query, events, dataset_id)
+            return self._match_eql(rule, query, events, dataset_id, tech)
         if language in ("kuery", "kql"):
-            return self._match_kql(rule, query, events, dataset_id)
+            return self._match_kql(rule, query, events, dataset_id, tech)
         log.warning(
             "ElasticMatcher.match() received unsupported language %r for rule %s; "
             "this should have been caught by support_reason().",
@@ -118,6 +122,7 @@ class ElasticMatcher:
         query: str,
         events: list[dict[str, Any]],
         dataset_id: str,
+        technique_id: str,
     ) -> list[FireRecord]:
         """Evaluate an EQL query against *events* using the eql Python library."""
         parsed_query = eql.parse_query(query)
@@ -133,7 +138,7 @@ class ElasticMatcher:
             fires.append(
                 FireRecord(
                     rule_id=rule.rule_id or rule.title,
-                    technique_id=(rule.technique_ids[0] if rule.technique_ids else ""),
+                    technique_id=technique_id,
                     dataset_id=dataset_id,
                     event_index=event_idx,
                 )
@@ -163,6 +168,7 @@ class ElasticMatcher:
         query: str,
         events: list[dict[str, Any]],
         dataset_id: str,
+        technique_id: str,
     ) -> list[FireRecord]:
         """Evaluate a KQL/kuery query against *events* using the custom evaluator."""
         from ._kql import evaluate, parse_kql
@@ -174,7 +180,7 @@ class ElasticMatcher:
                 fires.append(
                     FireRecord(
                         rule_id=rule.rule_id or rule.title,
-                        technique_id=(rule.technique_ids[0] if rule.technique_ids else ""),
+                        technique_id=technique_id,
                         dataset_id=dataset_id,
                         event_index=idx,
                     )

@@ -31,10 +31,13 @@ class Matcher(Protocol):
         rule: DetectionRule,
         events: list[dict[str, Any]],
         dataset_id: str,
+        technique_id: str | None = None,
     ) -> list[FireRecord]:
         """Return fire records for this rule against this dataset's events.
 
-        Caller truncates per-pair to 20.
+        ``technique_id`` is the technique the orchestrator is currently
+        evaluating; fires are stamped with it (falling back to the rule's
+        first tagged technique when omitted). Caller truncates per-pair to 20.
         """
         ...
 

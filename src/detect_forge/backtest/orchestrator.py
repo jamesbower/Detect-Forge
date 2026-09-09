@@ -81,12 +81,15 @@ def run_backtest(
             datasets_fired = 0
             for ds in datasets:
                 try:
-                    ds_fires = matcher.match(rule, ds.events, ds.dataset_id)
+                    ds_fires = matcher.match(rule, ds.events, ds.dataset_id, technique_id=tid)
                 except Exception as exc:  # noqa: BLE001
-                    log.debug(
-                        "Matcher exception on %s/%s: %s",
+                    # One bad dataset must not crash the scan, but surface it at
+                    # WARNING so systematic matcher bugs don't hide as false silents.
+                    log.warning(
+                        "Matcher exception on %s/%s (%s): %s",
                         rule.source_file,
                         ds.dataset_id,
+                        tid,
                         exc,
                     )
                     continue

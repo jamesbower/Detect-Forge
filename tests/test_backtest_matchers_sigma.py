@@ -791,3 +791,48 @@ def test_sigma_non_dict_events_do_not_crash() -> None:
 
     y = "detection:\n  selection:\n    A: '1'\n  condition: selection\n"
     assert SigmaMatcher().match(_rule_from_yaml(y), ["junk", 5], "ds") == []
+
+
+# --------------------------------------------------------------------------
+# Task 5: temporal ordering by timestamp (M12), TimeCreated dict (M13),
+# fire technique attribution (M14)
+# --------------------------------------------------------------------------
+
+
+def test_sigma_temporal_ordered_uses_timestamp_not_array_order() -> None:
+    from detect_forge.backtest.matchers.sigma import SigmaMatcher
+
+    y = (
+        "correlation:\n  type: temporal_ordered\n  rules:\n    - a\n    - b\n  timespan: 1h\n"
+        "detection:\n  selection_a:\n    step: 'a'\n  selection_b:\n    step: 'b'\n"
+        "  condition: 1 of selection_*\n"
+    )
+    # Array order is b-before-a, but timestamps put a before b.
+    events = [
+        {"step": "b", "@timestamp": "2026-01-01T00:10:00Z"},
+        {"step": "a", "@timestamp": "2026-01-01T00:00:00Z"},
+    ]
+    assert bool(SigmaMatcher().match(_rule_from_yaml(y), events, "ds"))
+
+
+def test_sigma_event_timestamp_parses_timecreated_dict() -> None:
+    from detect_forge.backtest.matchers.sigma import _event_timestamp
+
+    assert _event_timestamp({"TimeCreated": {"SystemTime": "2026-01-01T00:00:00Z"}}) is not None
+
+
+def test_sigma_fire_records_use_evaluated_technique() -> None:
+    from detect_forge.backtest.matchers.sigma import SigmaMatcher
+
+    rule = DetectionRule(
+        title="multi",
+        technique_ids=["T1003", "T1059"],
+        source_file=Path("/r.yml"),
+        raw_tags=[],
+        raw_yaml="detection:\n  selection:\n    A: '1'\n  condition: selection\n",
+    )
+    fires = SigmaMatcher().match(rule, [{"A": "1"}], "ds", technique_id="T1059")
+    assert fires and all(f.technique_id == "T1059" for f in fires)
+    # Backward-compatible default: no technique_id → first tagged technique.
+    fires_default = SigmaMatcher().match(rule, [{"A": "1"}], "ds")
+    assert fires_default and fires_default[0].technique_id == "T1003"

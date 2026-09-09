@@ -87,13 +87,15 @@ class SigmaMatcher:
         rule: DetectionRule,
         events: list[dict[str, Any]],
         dataset_id: str,
+        technique_id: str | None = None,
     ) -> list[FireRecord]:
         if not self.supports(rule):
             return []
         assert rule.raw_yaml is not None  # narrowed by supports()
+        tech = _fire_technique(rule, technique_id)
         parsed = yaml.safe_load(rule.raw_yaml)
         if "correlation" in parsed:
-            return self._match_correlation(parsed, rule, events, dataset_id)
+            return self._match_correlation(parsed, rule, events, dataset_id, tech)
         detection = parsed["detection"]
         condition_expr = detection.get("condition", "")
         selection_names = [k for k in detection if k != "condition"]
@@ -109,7 +111,7 @@ class SigmaMatcher:
                 fires.append(
                     FireRecord(
                         rule_id=rule.rule_id or rule.title,
-                        technique_id=rule.technique_ids[0] if rule.technique_ids else "",
+                        technique_id=tech,
                         dataset_id=dataset_id,
                         event_index=idx,
                     )
@@ -124,6 +126,7 @@ class SigmaMatcher:
         rule: DetectionRule,
         events: list[dict[str, Any]],
         dataset_id: str,
+        technique_id: str,
     ) -> list[FireRecord]:
         corr = parsed["correlation"]
         corr_type = corr["type"]
@@ -174,20 +177,20 @@ class SigmaMatcher:
 
         if corr_type == "event_count":
             return self._eval_event_count(
-                ts_events, condition, timespan_seconds, rule, dataset_id,
+                ts_events, condition, timespan_seconds, rule, dataset_id, technique_id,
             )
         if corr_type == "value_count":
             return self._eval_value_count(
-                ts_events, condition, timespan_seconds, rule, dataset_id,
+                ts_events, condition, timespan_seconds, rule, dataset_id, technique_id,
             )
         if corr_type == "temporal":
             return self._eval_temporal(
-                ts_events, rule_ids, timespan_seconds, rule, dataset_id,
+                ts_events, rule_ids, timespan_seconds, rule, dataset_id, technique_id,
                 ordered=False,
             )
         if corr_type == "temporal_ordered":
             return self._eval_temporal(
-                ts_events, rule_ids, timespan_seconds, rule, dataset_id,
+                ts_events, rule_ids, timespan_seconds, rule, dataset_id, technique_id,
                 ordered=True,
             )
         return []
@@ -199,6 +202,7 @@ class SigmaMatcher:
         window: float,
         rule: DetectionRule,
         dataset_id: str,
+        technique_id: str,
     ) -> list[FireRecord]:
         """Sliding window: at each match, count matches in [t - window, t] per group."""
         fires: list[FireRecord] = []
@@ -212,7 +216,7 @@ class SigmaMatcher:
                 if ts2 >= window_start and ts2 <= ts and m2 and gk2 == group_key
             )
             if _check_threshold(count, condition):
-                fires.append(_make_fire(rule, dataset_id, idx))
+                fires.append(_make_fire(rule, dataset_id, idx, technique_id))
         return fires
 
     def _eval_value_count(
@@ -222,6 +226,7 @@ class SigmaMatcher:
         window: float,
         rule: DetectionRule,
         dataset_id: str,
+        technique_id: str,
     ) -> list[FireRecord]:
         """Distinct count of `condition.field` values in window per group."""
         field = str(condition.get("field", ""))
@@ -237,7 +242,7 @@ class SigmaMatcher:
             }
             distinct.discard(None)
             if _check_threshold(len(distinct), condition):
-                fires.append(_make_fire(rule, dataset_id, idx))
+                fires.append(_make_fire(rule, dataset_id, idx, technique_id))
         return fires
 
     def _eval_temporal(
@@ -247,6 +252,7 @@ class SigmaMatcher:
         window: float,
         rule: DetectionRule,
         dataset_id: str,
+        technique_id: str,
         *,
         ordered: bool,
     ) -> list[FireRecord]:
@@ -276,16 +282,18 @@ class SigmaMatcher:
             if not required.issubset(seen):
                 continue
             if ordered:
-                # Verify each rule_id appears in order within the window.
+                # Order is defined by event time, not array position: sort the
+                # window chronologically before checking the required sequence.
+                ordered_window = sorted(in_window, key=lambda e: e[0])
                 order_idx = 0
-                for _, _, _, m2 in in_window:
+                for _, _, _, m2 in ordered_window:
                     if rule_ids[order_idx] in m2:
                         order_idx += 1
                         if order_idx == len(rule_ids):
                             break
                 if order_idx < len(rule_ids):
                     continue
-            fires.append(_make_fire(rule, dataset_id, idx))
+            fires.append(_make_fire(rule, dataset_id, idx, technique_id))
         return fires
 
 
@@ -609,6 +617,11 @@ def _event_timestamp(event: dict[str, Any]) -> float | None:
         v = event.get(field)
         if v is None:
             continue
+        if isinstance(v, dict):
+            # Windows event XML shape: {"TimeCreated": {"SystemTime": "..."}}.
+            v = v.get("SystemTime") or v.get("#text")
+            if v is None:
+                continue
         if isinstance(v, (int, float)):
             return float(v)
         if not isinstance(v, str):
@@ -637,10 +650,19 @@ def _check_threshold(count: int, condition: dict[str, Any]) -> bool:
     return False
 
 
-def _make_fire(rule: DetectionRule, dataset_id: str, event_index: int) -> FireRecord:
+def _fire_technique(rule: DetectionRule, technique_id: str | None) -> str:
+    """The technique to stamp on a fire: the one under evaluation, else the first tagged."""
+    if technique_id is not None:
+        return technique_id
+    return rule.technique_ids[0] if rule.technique_ids else ""
+
+
+def _make_fire(
+    rule: DetectionRule, dataset_id: str, event_index: int, technique_id: str
+) -> FireRecord:
     return FireRecord(
         rule_id=rule.rule_id or rule.title,
-        technique_id=rule.technique_ids[0] if rule.technique_ids else "",
+        technique_id=technique_id,
         dataset_id=dataset_id,
         event_index=event_index,
     )
