@@ -1,5 +1,5 @@
 {
-  "version": "2026.05",
+  "version": "2026-09-09",
   "source": "https://github.com/OTRF/Security-Datasets",
   "fetched_at": "2026-05-29T00:00:00Z",
   "license": "MIT",
@@ -7,33 +7,13 @@
   "datasets": {
     "T1059.001": [
       {
-        "dataset_id": "empire_invoke_psinject",
-        "url": "https://raw.githubusercontent.com/OTRF/Security-Datasets/master/datasets/atomic/windows/execution/host/empire_invoke_psinject.zip",
-        "platform": "windows",
-        "format": "json",
-        "size_bytes": 524288,
-        "event_count": 1247,
-        "sha256": ""
-      },
-      {
         "dataset_id": "empire_launcher_vbs",
         "url": "https://raw.githubusercontent.com/OTRF/Security-Datasets/master/datasets/atomic/windows/execution/host/empire_launcher_vbs.zip",
         "platform": "windows",
         "format": "json",
-        "size_bytes": 262144,
-        "event_count": 800,
-        "sha256": ""
-      }
-    ],
-    "T1059.003": [
-      {
-        "dataset_id": "empire_shell_spawn",
-        "url": "https://raw.githubusercontent.com/OTRF/Security-Datasets/master/datasets/atomic/windows/execution/host/empire_shell_spawn.zip",
-        "platform": "windows",
-        "format": "json",
-        "size_bytes": 262144,
-        "event_count": 650,
-        "sha256": ""
+        "size_bytes": 313016,
+        "event_count": 2067,
+        "sha256": "812da270cf8cda6f1948fb6275410f15dc1794d0bd6b623c9c25b2518285019c"
       }
     ],
     "T1003.001": [
@@ -42,142 +22,11 @@
         "url": "https://raw.githubusercontent.com/OTRF/Security-Datasets/master/datasets/atomic/windows/credential_access/host/empire_mimikatz_logonpasswords.zip",
         "platform": "windows",
         "format": "json",
-        "size_bytes": 1048576,
-        "event_count": 3104,
-        "sha256": ""
-      }
-    ],
-    "T1027": [
-      {
-        "dataset_id": "empire_obfuscation_invoke_obfuscation",
-        "url": "https://raw.githubusercontent.com/OTRF/Security-Datasets/master/datasets/atomic/windows/defense_evasion/host/empire_obfuscation_invoke_obfuscation.zip",
-        "platform": "windows",
-        "format": "json",
-        "size_bytes": 524288,
-        "event_count": 1000,
-        "sha256": ""
-      }
-    ],
-    "T1053.005": [
-      {
-        "dataset_id": "empire_schtask_creation",
-        "url": "https://raw.githubusercontent.com/OTRF/Security-Datasets/master/datasets/atomic/windows/persistence/host/empire_schtask_creation.zip",
-        "platform": "windows",
-        "format": "json",
-        "size_bytes": 262144,
-        "event_count": 500,
-        "sha256": ""
-      }
-    ],
-    "T1055": [
-      {
-        "dataset_id": "empire_dll_injection",
-        "url": "https://raw.githubusercontent.com/OTRF/Security-Datasets/master/datasets/atomic/windows/defense_evasion/host/empire_dll_injection.zip",
-        "platform": "windows",
-        "format": "json",
-        "size_bytes": 524288,
-        "event_count": 1200,
-        "sha256": ""
-      }
-    ],
-    "T1078": [
-      {
-        "dataset_id": "empire_valid_accounts_domain",
-        "url": "https://raw.githubusercontent.com/OTRF/Security-Datasets/master/datasets/atomic/windows/lateral_movement/host/empire_valid_accounts_domain.zip",
-        "platform": "windows",
-        "format": "json",
-        "size_bytes": 262144,
-        "event_count": 750,
-        "sha256": ""
-      }
-    ],
-    "T1105": [
-      {
-        "dataset_id": "empire_remote_file_copy",
-        "url": "https://raw.githubusercontent.com/OTRF/Security-Datasets/master/datasets/atomic/windows/command_and_control/host/empire_remote_file_copy.zip",
-        "platform": "windows",
-        "format": "json",
-        "size_bytes": 262144,
-        "event_count": 600,
-        "sha256": ""
-      }
-    ],
-    "T1110": [
-      {
-        "dataset_id": "empire_spray_net_users",
-        "url": "https://raw.githubusercontent.com/OTRF/Security-Datasets/master/datasets/atomic/windows/credential_access/host/empire_spray_net_users.zip",
-        "platform": "windows",
-        "format": "json",
-        "size_bytes": 262144,
-        "event_count": 1000,
-        "sha256": ""
-      }
-    ],
-    "T1218": [
-      {
-        "dataset_id": "empire_lolbas_regsvr32",
-        "url": "https://raw.githubusercontent.com/OTRF/Security-Datasets/master/datasets/atomic/windows/defense_evasion/host/empire_lolbas_regsvr32.zip",
-        "platform": "windows",
-        "format": "json",
-        "size_bytes": 262144,
-        "event_count": 500,
-        "sha256": ""
-      }
-    ],
-    "T1547.001": [
-      {
-        "dataset_id": "empire_reg_run_key_persistence",
-        "url": "https://raw.githubusercontent.com/OTRF/Security-Datasets/master/datasets/atomic/windows/persistence/host/empire_reg_run_key_persistence.zip",
-        "platform": "windows",
-        "format": "json",
-        "size_bytes": 262144,
-        "event_count": 400,
-        "sha256": ""
-      }
-    ],
-    "T1562.001": [
-      {
-        "dataset_id": "empire_disable_windows_defender",
-        "url": "https://raw.githubusercontent.com/OTRF/Security-Datasets/master/datasets/atomic/windows/defense_evasion/host/empire_disable_windows_defender.zip",
-        "platform": "windows",
-        "format": "json",
-        "size_bytes": 262144,
-        "event_count": 350,
-        "sha256": ""
-      }
-    ],
-    "T1569.002": [
-      {
-        "dataset_id": "empire_sc_create_service",
-        "url": "https://raw.githubusercontent.com/OTRF/Security-Datasets/master/datasets/atomic/windows/execution/host/empire_sc_create_service.zip",
-        "platform": "windows",
-        "format": "json",
-        "size_bytes": 262144,
-        "event_count": 450,
-        "sha256": ""
-      }
-    ],
-    "T1486": [
-      {
-        "dataset_id": "ransomware_wannacry_host",
-        "url": "https://raw.githubusercontent.com/OTRF/Security-Datasets/master/datasets/atomic/windows/impact/host/ransomware_wannacry_host.zip",
-        "platform": "windows",
-        "format": "json",
-        "size_bytes": 1048576,
-        "event_count": 2500,
-        "sha256": ""
-      }
-    ],
-    "T1036": [
-      {
-        "dataset_id": "empire_masquerading_rename_binary",
-        "url": "https://raw.githubusercontent.com/OTRF/Security-Datasets/master/datasets/atomic/windows/defense_evasion/host/empire_masquerading_rename_binary.zip",
-        "platform": "windows",
-        "format": "json",
-        "size_bytes": 262144,
-        "event_count": 400,
-        "sha256": ""
+        "size_bytes": 716749,
+        "event_count": 6026,
+        "sha256": "bb4c057b62d781be5426e011872ba1a15070c07afbb24848a14458f4b22b06fb"
       }
     ]
-  }
+  },
+  "note": "Curated snapshot: only datasets verified live in Security-Datasets are listed. Refresh periodically as the upstream repo changes. sha256 is enforced before extraction."
 }
