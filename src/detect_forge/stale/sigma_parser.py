@@ -52,10 +52,16 @@ def parse_rule_file(path: Path) -> DetectionRule | None:
         log.debug("Skipping non-dict YAML in %s", path)
         return None
 
-    tags: list[str] = raw.get("tags") or []
-    technique_ids = _extract_technique_ids(tags)
-
     try:
+        raw_tags_value = raw.get("tags")
+        # A malformed `tags:` (scalar, mapping, ...) must not abort the scan —
+        # treat anything that isn't a list as "no tags".
+        tags: list[object] = raw_tags_value if isinstance(raw_tags_value, list) else []
+        technique_ids = _extract_technique_ids(tags)
+        # raw_tags is typed list[str]; keep scalar tags (stringified), drop
+        # containers, so one non-string tag can't discard an otherwise-valid rule.
+        safe_tags = [str(t) for t in tags if isinstance(t, (str, int, float, bool))]
+
         return DetectionRule(
             rule_id=raw.get("id"),
             title=raw.get("title", path.stem),
@@ -65,9 +71,9 @@ def parse_rule_file(path: Path) -> DetectionRule | None:
             modified_date=_parse_rule_date(raw.get("modified")),
             technique_ids=technique_ids,
             source_file=path.resolve(),
-            raw_tags=tags,
+            raw_tags=safe_tags,
             raw_yaml=text,
         )
-    except ValidationError as exc:
-        log.warning("Validation error parsing %s: %s", path, exc)
+    except (ValidationError, TypeError, ValueError, AttributeError) as exc:
+        log.warning("Skipping malformed Sigma rule %s: %s", path, exc)
         return None

@@ -71,9 +71,12 @@ def parse_rule_file(path: Path) -> DetectionRule | None:
     if not isinstance(rule, dict):
         rule = {}
 
-    technique_ids = _extract_elastic_technique_ids(rule.get("threat", []) or [])
-
     try:
+        # A malformed `threat` (scalar, ...) must not abort the scan.
+        threat_value = rule.get("threat", [])
+        threats = threat_value if isinstance(threat_value, list) else []
+        technique_ids = _extract_elastic_technique_ids(threats)
+
         return DetectionRule(
             rule_id=rule.get("rule_id"),
             title=rule.get("name", path.stem),
@@ -86,6 +89,6 @@ def parse_rule_file(path: Path) -> DetectionRule | None:
             raw_tags=[],
             raw_toml=text,
         )
-    except ValidationError as exc:
-        log.warning("Validation error parsing %s: %s", path, exc)
+    except (ValidationError, TypeError, ValueError, AttributeError) as exc:
+        log.warning("Skipping malformed Elastic rule %s: %s", path, exc)
         return None

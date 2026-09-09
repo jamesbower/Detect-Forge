@@ -158,3 +158,12 @@ def test_parse_no_description_yields_none(tmp_path: Path) -> None:
     rule = parse_rule_file(p)
     assert rule is not None
     assert rule.description is None
+
+
+def test_scalar_threat_does_not_crash(tmp_path: Path) -> None:
+    """A scalar `threat` value must not abort the scan (T3)."""
+    f = tmp_path / "bad.toml"
+    f.write_text('[rule]\nname = "Bad threat"\nthreat = 5\nquery = \'x\'\n')
+    rule = parse_rule_file(f)
+    assert rule is not None
+    assert rule.technique_ids == []

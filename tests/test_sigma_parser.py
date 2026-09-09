@@ -174,3 +174,42 @@ def test_parse_rule_no_description_yields_none() -> None:
     rule = parse_rule_file(FIXTURES / "rule_with_subtechnique.yml")
     assert rule is not None
     assert rule.description is None
+
+
+# --------------------------------------------------------------------------
+# Task 10: malformed tags must not crash the scan (T3, T4)
+# --------------------------------------------------------------------------
+
+
+def test_scalar_tags_does_not_crash(tmp_path: Path) -> None:
+    f = tmp_path / "bad.yml"
+    f.write_text(
+        "title: Scalar tags\ntags: 42\n"
+        "detection:\n  selection:\n    Image: x\n  condition: selection\n"
+    )
+    rule = parse_rule_file(f)
+    assert rule is not None            # otherwise-valid rule is kept
+    assert rule.technique_ids == []
+    assert rule.raw_tags == []
+
+
+def test_mixed_type_tags_keeps_valid_technique(tmp_path: Path) -> None:
+    f = tmp_path / "mixed.yml"
+    f.write_text(
+        "title: Mixed tags\ntags:\n  - attack.t1059\n  - 5\n"
+        "detection:\n  selection:\n    Image: x\n  condition: selection\n"
+    )
+    rule = parse_rule_file(f)
+    assert rule is not None            # not dropped over a non-string tag
+    assert rule.technique_ids == ["T1059"]
+
+
+def test_one_bad_file_does_not_abort_dir_scan(tmp_path: Path) -> None:
+    (tmp_path / "bad.yml").write_text("title: Bad\ntags: 42\n")
+    (tmp_path / "good.yml").write_text(
+        "title: Good\ntags:\n  - attack.t1059\n"
+        "detection:\n  selection:\n    Image: x\n  condition: selection\n"
+    )
+    rules = parse_rule_dir(tmp_path)
+    titles = {r.title for r in rules}
+    assert "Good" in titles           # the good rule survives the bad one
