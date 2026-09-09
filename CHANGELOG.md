@@ -6,6 +6,20 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [0.1.1] - 2026-09-09
+
+Backtest hotfix — the bundled corpus was unusable against the live
+Security-Datasets repo.
+
+### Fixed
+- `backtest` now parses JSON Lines datasets (the real Security-Datasets
+  on-disk format, one event per line). The loader previously assumed a JSON
+  array and failed every real dataset with "Extra data", silently reporting
+  all rules as `untested`.
+- Pruned the bundled Mordor index to the datasets that are still live upstream
+  (14 of 16 URLs had 404'd) and populated their real SHA256 hashes, so
+  integrity is verified and runs no longer emit 404 warnings.
+
 ## [0.1.0] - 2026-09-09
 
 Initial public release.
@@ -30,5 +44,6 @@ Initial public release.
 - Coverage/audit: empty/mistyped priority list is a loud error; sub-technique
   coverage rolls up to parents; audit honors per-subcommand config + gate flags.
 
-[Unreleased]: https://github.com/jamesbower/Detect-Forge/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/jamesbower/Detect-Forge/compare/v0.1.1...HEAD
+[0.1.1]: https://github.com/jamesbower/Detect-Forge/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/jamesbower/Detect-Forge/releases/tag/v0.1.0
