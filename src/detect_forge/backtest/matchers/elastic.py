@@ -1,9 +1,12 @@
 """Elastic Detection Rules matcher.
 
 Routes by the rule's ``language`` field:
-- ``eql``    → eql Python library
-- ``kuery``  → custom KQL evaluator (Task 9; v0.1 here: unsupported)
-- ``esql``   → unsupported (v0.2)
+- ``eql``            → eql Python library
+- ``kuery`` / ``kql`` → custom KQL evaluator (see ``_kql``)
+- ``esql``           → unsupported (deferred to v0.2)
+
+A missing ``language`` defaults to ``kuery`` — the Elastic default — so
+rules that omit the field are still evaluated rather than skipped.
 
 Uses tomllib to parse the rule's raw TOML and extract the [rule] block.
 """
@@ -25,13 +28,14 @@ log = logging.getLogger(__name__)
 class ElasticMatcher:
     """Elastic Detection Rules → JSON event evaluator.
 
-    Supports EQL rules (``language = "eql"``).  KQL (``kuery``) and ES|QL
-    (``esql``) are not yet implemented and will return ``supports=False``
-    with a descriptive reason.
+    Supports EQL rules (``language = "eql"``) and KQL/kuery rules (the
+    ``_kql`` subset). A missing ``language`` is treated as kuery. ES|QL
+    (``esql``) returns ``supports=False`` with a descriptive reason
+    (deferred to v0.2).
     """
 
     def supports(self, rule: DetectionRule) -> bool:
-        """Return True only for syntactically-valid EQL rules."""
+        """Return True for syntactically-valid EQL or supported KQL rules."""
         supports, _ = self.support_reason(rule)
         return supports
 
@@ -48,7 +52,8 @@ class ElasticMatcher:
             return False, f"Elastic TOML parse error: {exc}"
 
         rule_block = parsed.get("rule", {})
-        language = rule_block.get("language", "").lower()
+        # Elastic Detection Rules default to kuery when `language` is omitted.
+        language = rule_block.get("language", "").lower() or "kuery"
 
         if language == "esql":
             return False, "ES|QL matcher deferred to v0.2"

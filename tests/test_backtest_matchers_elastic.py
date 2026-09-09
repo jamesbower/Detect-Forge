@@ -247,6 +247,29 @@ def test_kql_premature_eof_raises_unsupported() -> None:
     assert "end" in (reason or "").lower() or "incomplete" in (reason or "").lower()
 
 
+def test_elastic_missing_language_defaults_to_kuery() -> None:
+    """Elastic rules commonly omit `language`; it defaults to kuery, not unsupported."""
+    from detect_forge.backtest.matchers.elastic import ElasticMatcher
+
+    toml = """
+[rule]
+name = "No language field"
+type = "query"
+query = 'process.name : "powershell.exe"'
+"""
+    rule = DetectionRule(
+        title="No language field",
+        technique_ids=["T1059"],
+        source_file=Path("/r.toml"),
+        raw_tags=[],
+        raw_toml=toml,
+    )
+    m = ElasticMatcher()
+    assert m.supports(rule) is True
+    fires = m.match(rule, [{"process": {"name": "powershell.exe"}}], "ds1")
+    assert {f.event_index for f in fires} == {0}
+
+
 def test_kql_matches_ecs_list_valued_fields() -> None:
     """ECS list-valued fields (e.g., host.ip) match if any element matches."""
     from detect_forge.backtest.matchers.elastic import ElasticMatcher
