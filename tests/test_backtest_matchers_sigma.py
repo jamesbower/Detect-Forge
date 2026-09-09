@@ -657,3 +657,61 @@ detection:
     m = SigmaMatcher()
     fires = m.match(rule, events, "ds1")
     assert fires == []  # only 2 distinct DestinationIPs → below gte: 3
+
+
+# --------------------------------------------------------------------------
+# Task 1: plain-value wildcards, case-insensitivity, int/str coercion (M1,M4,M5)
+# --------------------------------------------------------------------------
+
+
+def _fires(yaml_text: str, events: list[dict[str, Any]]) -> bool:
+    from detect_forge.backtest.matchers.sigma import SigmaMatcher
+
+    return bool(SigmaMatcher().match(_rule_from_yaml(yaml_text), events, "ds"))
+
+
+def test_sigma_plain_value_wildcard_matches() -> None:
+    y = "detection:\n  selection:\n    CommandLine: '*-enc*'\n  condition: selection\n"
+    assert _fires(y, [{"CommandLine": "powershell.exe -enc AAA"}])
+    assert not _fires(y, [{"CommandLine": "powershell.exe -Command x"}])
+
+
+def test_sigma_plain_value_question_mark_wildcard() -> None:
+    y = "detection:\n  selection:\n    Image: 'cmd?.exe'\n  condition: selection\n"
+    assert _fires(y, [{"Image": "cmd1.exe"}])
+    assert not _fires(y, [{"Image": "cmd12.exe"}])
+
+
+def test_sigma_plain_value_case_insensitive() -> None:
+    y = "detection:\n  selection:\n    Image: 'CMD.EXE'\n  condition: selection\n"
+    assert _fires(y, [{"Image": "cmd.exe"}])
+    assert _fires(y, [{"Image": "CMD.EXE"}])
+
+
+def test_sigma_contains_modifier_case_insensitive() -> None:
+    y = "detection:\n  selection:\n    CommandLine|contains: '-ENC'\n  condition: selection\n"
+    assert _fires(y, [{"CommandLine": "powershell -enc x"}])
+
+
+def test_sigma_int_string_coercion() -> None:
+    y = "detection:\n  selection:\n    EventID: 1\n  condition: selection\n"
+    assert _fires(y, [{"EventID": "1"}])
+    assert _fires(y, [{"EventID": 1}])
+    assert not _fires(y, [{"EventID": "2"}])
+
+
+# --------------------------------------------------------------------------
+# Task 3: list-valued event fields (M6) and `field: null` (M7)
+# --------------------------------------------------------------------------
+
+
+def test_sigma_list_valued_event_field() -> None:
+    y = "detection:\n  selection:\n    category: 'process'\n  condition: selection\n"
+    assert _fires(y, [{"category": ["network", "process"]}])
+    assert not _fires(y, [{"category": ["network", "file"]}])
+
+
+def test_sigma_field_null_matches_absent() -> None:
+    y = "detection:\n  selection:\n    Ghost: null\n  condition: selection\n"
+    assert _fires(y, [{"Other": "x"}])            # Ghost absent -> matches null
+    assert not _fires(y, [{"Ghost": "present"}])

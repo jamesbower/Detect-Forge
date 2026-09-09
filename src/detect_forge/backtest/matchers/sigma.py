@@ -312,6 +312,23 @@ def _parse_field_spec(field_spec: str) -> tuple[str, list[str]]:
     return parts[0], parts[1:]
 
 
+def _wildcard_to_regex(spec: str) -> str:
+    """Translate a Sigma plain-value wildcard pattern to an anchored regex.
+
+    ``*`` matches any run of characters, ``?`` matches a single character;
+    every other character is escaped literally.
+    """
+    out: list[str] = []
+    for ch in spec:
+        if ch == "*":
+            out.append(".*")
+        elif ch == "?":
+            out.append(".")
+        else:
+            out.append(re.escape(ch))
+    return "^" + "".join(out) + "$"
+
+
 def _value_matches(actual: Any, value_spec: Any, modifiers: list[str]) -> bool:
     """Apply modifiers to compare actual (event value) against value_spec.
 
@@ -321,6 +338,13 @@ def _value_matches(actual: Any, value_spec: Any, modifiers: list[str]) -> bool:
     ``field|contains|all``. Other modifiers are filtered out at supports(),
     so only these five can appear here.
     List value_spec is OR'd by default; AND'd when ``all`` is in modifiers.
+
+    Comparisons follow the SigmaHQ spec: plain values and the string
+    modifiers (contains/startswith/endswith) are case-insensitive, plain
+    values honour ``*``/``?`` wildcards, and non-string event values are
+    stringified so ``EventID: 1`` matches an event carrying ``"1"``. The
+    ``re`` modifier stays case-sensitive (use ``re|i`` for insensitive —
+    not yet supported).
     """
     use_all = "all" in modifiers
     if use_all:
@@ -328,27 +352,31 @@ def _value_matches(actual: Any, value_spec: Any, modifiers: list[str]) -> bool:
     if isinstance(value_spec, list):
         check = all if use_all else any
         return check(_value_matches(actual, v, modifiers) for v in value_spec)
+    if value_spec is None:
+        # Sigma ``field: null`` matches when the field is absent/None.
+        return actual is None
+    if isinstance(actual, list):
+        # ECS multi-value event fields: match if ANY element matches.
+        return any(_value_matches(item, value_spec, modifiers) for item in actual)
     if actual is None:
         return False
-    if not modifiers:
-        return bool(actual == value_spec)
     actual_str = str(actual)
     spec_str = str(value_spec)
-    # v0.1 simplification: string modifiers (contains, startswith, endswith)
-    # are case-SENSITIVE here. The SigmaHQ spec defines them as
-    # case-insensitive — backends lowercase both sides before comparing.
-    # Real-world rules typically already normalize case in their selectors,
-    # so the practical mismatch rate is low, but be aware when reading
-    # results. Lowercase-everything is tracked for v0.2.
+    if not modifiers:
+        if isinstance(value_spec, str) and ("*" in value_spec or "?" in value_spec):
+            return re.match(_wildcard_to_regex(spec_str), actual_str, re.IGNORECASE) is not None
+        return actual_str.casefold() == spec_str.casefold()
+    actual_cf = actual_str.casefold()
+    spec_cf = spec_str.casefold()
     for mod in modifiers:
         if mod == "contains":
-            if spec_str not in actual_str:
+            if spec_cf not in actual_cf:
                 return False
         elif mod == "startswith":
-            if not actual_str.startswith(spec_str):
+            if not actual_cf.startswith(spec_cf):
                 return False
         elif mod == "endswith":
-            if not actual_str.endswith(spec_str):
+            if not actual_cf.endswith(spec_cf):
                 return False
         elif mod == "re":
             if not re.search(spec_str, actual_str):
