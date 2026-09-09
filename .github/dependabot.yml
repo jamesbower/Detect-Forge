@@ -1,0 +1,14 @@
+version: 2
+updates:
+  # Keep GitHub Actions pinned in the workflows up to date (e.g. actions/checkout,
+  # actions/setup-python). Groups all bumps into a single weekly PR to reduce noise.
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    commit-message:
+      prefix: "ci"
+    groups:
+      github-actions:
+        patterns:
+          - "*"
