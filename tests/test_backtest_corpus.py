@@ -35,6 +35,29 @@ def test_corpus_loads_builtin_index() -> None:
     assert isinstance(idx["datasets"], dict)
 
 
+def test_builtin_index_entries_are_well_formed() -> None:
+    """Guard against index drift/corruption: every bundled entry must have a
+    valid technique ID, an https ZIP url, and a populated sha256."""
+    import re
+
+    from detect_forge.backtest.corpus import load_builtin_index
+
+    tid_re = re.compile(r"^T\d{4}(\.\d{3})?$")
+    sha_re = re.compile(r"^[0-9a-f]{64}$")
+    datasets = load_builtin_index()["datasets"]
+    assert datasets, "bundled index is empty"
+    seen_ids: set[str] = set()
+    for tid, entries in datasets.items():
+        assert tid_re.match(tid), f"bad technique id in index: {tid!r}"
+        for e in entries:
+            assert e["technique_id"] == tid
+            assert e["url"].startswith("https://") and e["url"].endswith(".zip")
+            assert sha_re.match(e.get("sha256", "")), f"bad sha256: {e['dataset_id']}"
+            assert e.get("event_count", 0) > 0
+            seen_ids.add(e["dataset_id"])
+    assert len(seen_ids) >= 2  # non-trivial corpus
+
+
 def test_corpus_datasets_for_returns_empty_for_unknown_technique(
     tmp_path: Path,
 ) -> None:

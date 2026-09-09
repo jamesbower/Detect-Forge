@@ -1,32 +1,847 @@
 {
   "version": "2026-09-09",
   "source": "https://github.com/OTRF/Security-Datasets",
-  "fetched_at": "2026-05-29T00:00:00Z",
-  "license": "MIT",
-  "scope": "atomic only (compound deferred to v0.2)",
+  "note": "Rebuilt from Security-Datasets per-dataset metadata (atomic Windows/Linux host telemetry). sha256 is enforced before extraction; data is JSON Lines.",
   "datasets": {
-    "T1059.001": [
+    "T1003": [
       {
-        "dataset_id": "empire_launcher_vbs",
-        "url": "https://raw.githubusercontent.com/OTRF/Security-Datasets/master/datasets/atomic/windows/execution/host/empire_launcher_vbs.zip",
+        "dataset_id": "empire_mimikatz_backupkeys_dcerpc_smb_lsarpc",
+        "technique_id": "T1003",
         "platform": "windows",
-        "format": "json",
-        "size_bytes": 313016,
-        "event_count": 2067,
-        "sha256": "812da270cf8cda6f1948fb6275410f15dc1794d0bd6b623c9c25b2518285019c"
+        "url": "https://raw.githubusercontent.com/OTRF/Security-Datasets/master/datasets/atomic/windows/credential_access/host/empire_mimikatz_backupkeys_dcerpc_smb_lsarpc.zip",
+        "sha256": "63ee26d89071b9026a2381c31cd9d5842435e3859e1c0d84825cdbb01475e4d8",
+        "size_bytes": 618319,
+        "format": "jsonl",
+        "event_count": 7887
       }
     ],
     "T1003.001": [
       {
         "dataset_id": "empire_mimikatz_logonpasswords",
-        "url": "https://raw.githubusercontent.com/OTRF/Security-Datasets/master/datasets/atomic/windows/credential_access/host/empire_mimikatz_logonpasswords.zip",
+        "technique_id": "T1003.001",
         "platform": "windows",
-        "format": "json",
+        "url": "https://raw.githubusercontent.com/OTRF/Security-Datasets/master/datasets/atomic/windows/credential_access/host/empire_mimikatz_logonpasswords.zip",
+        "sha256": "bb4c057b62d781be5426e011872ba1a15070c07afbb24848a14458f4b22b06fb",
         "size_bytes": 716749,
-        "event_count": 6026,
-        "sha256": "bb4c057b62d781be5426e011872ba1a15070c07afbb24848a14458f4b22b06fb"
+        "format": "jsonl",
+        "event_count": 6026
+      },
+      {
+        "dataset_id": "rdp_interactive_taskmanager_lsass_dump",
+        "technique_id": "T1003.001",
+        "platform": "windows",
+        "url": "https://raw.githubusercontent.com/OTRF/Security-Datasets/master/datasets/atomic/windows/credential_access/host/rdp_interactive_taskmanager_lsass_dump.zip",
+        "sha256": "a7761e64c891162e949afebf367084a6dddd2f3dac7b91bce870fcf9f6206fba",
+        "size_bytes": 402013,
+        "format": "jsonl",
+        "event_count": 5489
+      }
+    ],
+    "T1003.002": [
+      {
+        "dataset_id": "empire_mimikatz_sam_access",
+        "technique_id": "T1003.002",
+        "platform": "windows",
+        "url": "https://raw.githubusercontent.com/OTRF/Security-Datasets/master/datasets/atomic/windows/credential_access/host/empire_mimikatz_sam_access.zip",
+        "sha256": "1ed87bd1286fa8f9e01489ff49e913065e4d1a1956174eb64687c1159648fcad",
+        "size_bytes": 777887,
+        "format": "jsonl",
+        "event_count": 12349
+      },
+      {
+        "dataset_id": "empire_shell_reg_dump_sam",
+        "technique_id": "T1003.002",
+        "platform": "windows",
+        "url": "https://raw.githubusercontent.com/OTRF/Security-Datasets/master/datasets/atomic/windows/credential_access/host/empire_shell_reg_dump_sam.zip",
+        "sha256": "5a8ee19860f35da6d4bcadf15178a085b469086c461d3d873d0f4adedba41f0a",
+        "size_bytes": 138425,
+        "format": "jsonl",
+        "event_count": 738
+      }
+    ],
+    "T1003.003": [
+      {
+        "dataset_id": "empire_shell_rubeus_asktgt_ptt",
+        "technique_id": "T1003.003",
+        "platform": "windows",
+        "url": "https://raw.githubusercontent.com/OTRF/Security-Datasets/master/datasets/atomic/windows/credential_access/host/empire_shell_rubeus_asktgt_ptt.zip",
+        "sha256": "a2ad97df3783fe2e911844111b3e4dabe0389502f52ea72525bb280b95e5394a",
+        "size_bytes": 224344,
+        "format": "jsonl",
+        "event_count": 1179
+      },
+      {
+        "dataset_id": "empire_shell_rubeus_asktgt_createnetonly",
+        "technique_id": "T1003.003",
+        "platform": "windows",
+        "url": "https://raw.githubusercontent.com/OTRF/Security-Datasets/master/datasets/atomic/windows/credential_access/host/empire_shell_rubeus_asktgt_createnetonly.zip",
+        "sha256": "3ed7d6d93ccadac94b0022151aa76ab54070c0ff7b977f6642bb4ee2f34b13da",
+        "size_bytes": 432741,
+        "format": "jsonl",
+        "event_count": 3590
+      }
+    ],
+    "T1003.004": [
+      {
+        "dataset_id": "empire_mimikatz_extract_keys",
+        "technique_id": "T1003.004",
+        "platform": "windows",
+        "url": "https://raw.githubusercontent.com/OTRF/Security-Datasets/master/datasets/atomic/windows/credential_access/host/empire_mimikatz_extract_keys.zip",
+        "sha256": "5511f426c3712d811b629451b852d3de014ddf3e01465e5ae380f5672968692f",
+        "size_bytes": 1032818,
+        "format": "jsonl",
+        "event_count": 13199
+      },
+      {
+        "dataset_id": "cmd_psexec_lsa_secrets_dump",
+        "technique_id": "T1003.004",
+        "platform": "windows",
+        "url": "https://raw.githubusercontent.com/OTRF/Security-Datasets/master/datasets/atomic/windows/credential_access/host/cmd_psexec_lsa_secrets_dump.zip",
+        "sha256": "c52e6145fefe37373a5274e2976ccf6d62e4d33e13c55dc1a2ce17f00506d1a6",
+        "size_bytes": 38086,
+        "format": "jsonl",
+        "event_count": 286
+      }
+    ],
+    "T1003.006": [
+      {
+        "dataset_id": "empire_dcsync_dcerpc_drsuapi_DsGetNCChanges",
+        "technique_id": "T1003.006",
+        "platform": "windows",
+        "url": "https://raw.githubusercontent.com/OTRF/Security-Datasets/master/datasets/atomic/windows/credential_access/host/empire_dcsync_dcerpc_drsuapi_DsGetNCChanges.zip",
+        "sha256": "fe1fcc96c0ff0cbae8fd4ffaadf85f51e28475441774f6fda3d963d4e2962800",
+        "size_bytes": 655112,
+        "format": "jsonl",
+        "event_count": 8465
+      },
+      {
+        "dataset_id": "covenant_dcsync_dcerpc_drsuapi_DsGetNCChanges",
+        "technique_id": "T1003.006",
+        "platform": "windows",
+        "url": "https://raw.githubusercontent.com/OTRF/Security-Datasets/master/datasets/atomic/windows/credential_access/host/covenant_dcsync_dcerpc_drsuapi_DsGetNCChanges.zip",
+        "sha256": "ccbb0e91c03fa1d575b3bfccba59f3bba62479860bd9ee8b571a907333eb9082",
+        "size_bytes": 76924,
+        "format": "jsonl",
+        "event_count": 869
+      }
+    ],
+    "T1012": [
+      {
+        "dataset_id": "cmd_seatbelt_group_user",
+        "technique_id": "T1012",
+        "platform": "windows",
+        "url": "https://raw.githubusercontent.com/OTRF/Security-Datasets/master/datasets/atomic/windows/discovery/host/cmd_seatbelt_group_user.zip",
+        "sha256": "d885d5c331641d24594869c62eaae563d1ff0c18a2d3c2ba71f48b10e663b1bc",
+        "size_bytes": 48537,
+        "format": "jsonl",
+        "event_count": 451
+      }
+    ],
+    "T1021": [
+      {
+        "dataset_id": "empire_psexec_dcerpc_tcp_svcctl",
+        "technique_id": "T1021",
+        "platform": "windows",
+        "url": "https://raw.githubusercontent.com/OTRF/Security-Datasets/master/datasets/atomic/windows/lateral_movement/host/empire_psexec_dcerpc_tcp_svcctl.zip",
+        "sha256": "8f40e7fc86bbbf31ebd50b3ba537cf0f4378392ae3e74de84bee00aeb0de1fa5",
+        "size_bytes": 656179,
+        "format": "jsonl",
+        "event_count": 4348
+      }
+    ],
+    "T1021.002": [
+      {
+        "dataset_id": "empire_smbexec_dcerpc_smb_svcctl",
+        "technique_id": "T1021.002",
+        "platform": "windows",
+        "url": "https://raw.githubusercontent.com/OTRF/Security-Datasets/master/datasets/atomic/windows/lateral_movement/host/empire_smbexec_dcerpc_smb_svcctl.zip",
+        "sha256": "c0fc435c9ce0ecdc7cd57b4055977b949ac6b1cae9d7f4ce7aa0f0e5eae7d7f1",
+        "size_bytes": 753172,
+        "format": "jsonl",
+        "event_count": 7504
+      },
+      {
+        "dataset_id": "covenant_sc_query_dcerpc_smb_svcctl",
+        "technique_id": "T1021.002",
+        "platform": "windows",
+        "url": "https://raw.githubusercontent.com/OTRF/Security-Datasets/master/datasets/atomic/windows/lateral_movement/host/covenant_sc_query_dcerpc_smb_svcctl.zip",
+        "sha256": "3975cdac314bbebb53721668229c9b7925206bac8f61447d154abaf0302a7c30",
+        "size_bytes": 62198,
+        "format": "jsonl",
+        "event_count": 629
+      }
+    ],
+    "T1021.003": [
+      {
+        "dataset_id": "empire_dcom_shellwindows_stager",
+        "technique_id": "T1021.003",
+        "platform": "windows",
+        "url": "https://raw.githubusercontent.com/OTRF/Security-Datasets/master/datasets/atomic/windows/lateral_movement/host/empire_dcom_shellwindows_stager.zip",
+        "sha256": "9ec1bcfffc46158565ad99a06b9a0a6bac97a152a513c32686be2084f54065c9",
+        "size_bytes": 2169218,
+        "format": "jsonl",
+        "event_count": 32706
+      },
+      {
+        "dataset_id": "covenant_dcom_executeexcel4macro_allowed",
+        "technique_id": "T1021.003",
+        "platform": "windows",
+        "url": "https://raw.githubusercontent.com/OTRF/Security-Datasets/master/datasets/atomic/windows/lateral_movement/host/covenant_dcom_executeexcel4macro_allowed.zip",
+        "sha256": "4dabf4be2b6103dadf27c29ad5734acf477003b3e1b1922e8e43871da7e0fdef",
+        "size_bytes": 695021,
+        "format": "jsonl",
+        "event_count": 8121
+      }
+    ],
+    "T1021.006": [
+      {
+        "dataset_id": "empire_psremoting_stager",
+        "technique_id": "T1021.006",
+        "platform": "windows",
+        "url": "https://raw.githubusercontent.com/OTRF/Security-Datasets/master/datasets/atomic/windows/lateral_movement/host/empire_psremoting_stager.zip",
+        "sha256": "214355730c8cf903f4423c96aa7459fed7b74258e2a6766b794ba316e9d3a46e",
+        "size_bytes": 409741,
+        "format": "jsonl",
+        "event_count": 2744
+      },
+      {
+        "dataset_id": "covenant_psremoting_command",
+        "technique_id": "T1021.006",
+        "platform": "windows",
+        "url": "https://raw.githubusercontent.com/OTRF/Security-Datasets/master/datasets/atomic/windows/lateral_movement/host/covenant_psremoting_command.zip",
+        "sha256": "4a2e0f9688c87a90b17b608ff38fb2230ceb7305ea0368703dcfe53269e3f096",
+        "size_bytes": 359550,
+        "format": "jsonl",
+        "event_count": 4284
+      }
+    ],
+    "T1037.001": [
+      {
+        "dataset_id": "cmd_userinitmprlogonscript_batch",
+        "technique_id": "T1037.001",
+        "platform": "windows",
+        "url": "https://raw.githubusercontent.com/OTRF/Security-Datasets/master/datasets/atomic/windows/persistence/host/cmd_userinitmprlogonscript_batch.zip",
+        "sha256": "53a01d6976b7567a2464628d850c51cc48b1a91a932cd2b0e110a510bcedf858",
+        "size_bytes": 12864,
+        "format": "jsonl",
+        "event_count": 122
+      }
+    ],
+    "T1047": [
+      {
+        "dataset_id": "empire_msbuild_dcerpc_wmi_smb",
+        "technique_id": "T1047",
+        "platform": "windows",
+        "url": "https://raw.githubusercontent.com/OTRF/Security-Datasets/master/datasets/atomic/windows/lateral_movement/host/empire_msbuild_dcerpc_wmi_smb.zip",
+        "sha256": "edbc2fdd9e118da0999d7b941c78501cd4142e2afe9e794aed4349101fb59ca8",
+        "size_bytes": 653574,
+        "format": "jsonl",
+        "event_count": 4559
+      },
+      {
+        "dataset_id": "covenant_wmi_remote_event_subscription_ActiveScriptEventConsumers",
+        "technique_id": "T1047",
+        "platform": "windows",
+        "url": "https://raw.githubusercontent.com/OTRF/Security-Datasets/master/datasets/atomic/windows/lateral_movement/host/covenant_wmi_remote_event_subscription_ActiveScriptEventConsumers.zip",
+        "sha256": "6167815b2f1901a267d965335251dc035b211f2b6e0d2063903d764305b80415",
+        "size_bytes": 351088,
+        "format": "jsonl",
+        "event_count": 3719
+      }
+    ],
+    "T1049": [
+      {
+        "dataset_id": "empire_getsession_dcerpc_smb_srvsvc_NetSessEnum",
+        "technique_id": "T1049",
+        "platform": "windows",
+        "url": "https://raw.githubusercontent.com/OTRF/Security-Datasets/master/datasets/atomic/windows/discovery/host/empire_getsession_dcerpc_smb_srvsvc_NetSessEnum.zip",
+        "sha256": "43e39d48cbdd2c7c235240b19f7def568968a6abff0d8f355a76deedc7f75659",
+        "size_bytes": 468097,
+        "format": "jsonl",
+        "event_count": 5047
+      }
+    ],
+    "T1053.005": [
+      {
+        "dataset_id": "empire_schtasks_creation_standard_user",
+        "technique_id": "T1053.005",
+        "platform": "windows",
+        "url": "https://raw.githubusercontent.com/OTRF/Security-Datasets/master/datasets/atomic/windows/persistence/host/empire_schtasks_creation_standard_user.zip",
+        "sha256": "b073a18420c90394cd2b6ad7589c78d90eba32dc155ed04b12ac824a8fc591b4",
+        "size_bytes": 263732,
+        "format": "jsonl",
+        "event_count": 1297
+      },
+      {
+        "dataset_id": "empire_schtasks_creation_execution_elevated_user",
+        "technique_id": "T1053.005",
+        "platform": "windows",
+        "url": "https://raw.githubusercontent.com/OTRF/Security-Datasets/master/datasets/atomic/windows/persistence/host/empire_schtasks_creation_execution_elevated_user.zip",
+        "sha256": "74662dc5c52f4ac2fc9dcb336bae7fb4e101217169c65adf5784b03015501d3b",
+        "size_bytes": 4241110,
+        "format": "jsonl",
+        "event_count": 59399
+      }
+    ],
+    "T1055": [
+      {
+        "dataset_id": "psh_mavinject_dll_notepad",
+        "technique_id": "T1055",
+        "platform": "windows",
+        "url": "https://raw.githubusercontent.com/OTRF/Security-Datasets/master/datasets/atomic/windows/defense_evasion/host/psh_mavinject_dll_notepad.zip",
+        "sha256": "262680222316edb2dc0d7dca380dfe75191fb96779b8dacc8aac8a1d8bdc046b",
+        "size_bytes": 53452,
+        "format": "jsonl",
+        "event_count": 509
+      },
+      {
+        "dataset_id": "cmd_process_herpaderping_snippingtool",
+        "technique_id": "T1055",
+        "platform": "windows",
+        "url": "https://raw.githubusercontent.com/OTRF/Security-Datasets/master/datasets/atomic/windows/defense_evasion/host/cmd_process_herpaderping_snippingtool.zip",
+        "sha256": "c3132a3d8f22c27ec57f4ae258f3d70c25a4dc7cc637cdd82de093d6ff50abff",
+        "size_bytes": 36181,
+        "format": "jsonl",
+        "event_count": 282
+      }
+    ],
+    "T1055.001": [
+      {
+        "dataset_id": "empire_dllinjection_LoadLibrary_CreateRemoteThread",
+        "technique_id": "T1055.001",
+        "platform": "windows",
+        "url": "https://raw.githubusercontent.com/OTRF/Security-Datasets/master/datasets/atomic/windows/defense_evasion/host/empire_dllinjection_LoadLibrary_CreateRemoteThread.zip",
+        "sha256": "98071a478f57f2ca71530c4cb839f2054da0e6bd8b106caaa5d9518d1be0ccc8",
+        "size_bytes": 1103116,
+        "format": "jsonl",
+        "event_count": 12200
+      }
+    ],
+    "T1055.002": [
+      {
+        "dataset_id": "purplesharp_pe_injection_createremotethread",
+        "technique_id": "T1055.002",
+        "platform": "windows",
+        "url": "https://raw.githubusercontent.com/OTRF/Security-Datasets/master/datasets/atomic/windows/defense_evasion/host/purplesharp_pe_injection_createremotethread.zip",
+        "sha256": "d1cfff7404448fd9ac7558967837a9903bb474957949218c293c09fd56a5ca7a",
+        "size_bytes": 82238,
+        "format": "jsonl",
+        "event_count": 692
+      }
+    ],
+    "T1055.003": [
+      {
+        "dataset_id": "empire_psinject_PEinjection",
+        "technique_id": "T1055.003",
+        "platform": "windows",
+        "url": "https://raw.githubusercontent.com/OTRF/Security-Datasets/master/datasets/atomic/windows/defense_evasion/host/empire_psinject_PEinjection.zip",
+        "sha256": "ad6297ce8cfb908126e2ec1271d62f6cd8dcdac6006d7b6e5ecd377488b04df0",
+        "size_bytes": 827949,
+        "format": "jsonl",
+        "event_count": 5898
+      }
+    ],
+    "T1056.002": [
+      {
+        "dataset_id": "psh_input_capture_promptforcreds",
+        "technique_id": "T1056.002",
+        "platform": "windows",
+        "url": "https://raw.githubusercontent.com/OTRF/Security-Datasets/master/datasets/atomic/windows/credential_access/host/psh_input_capture_promptforcreds.zip",
+        "sha256": "768e3c32e39f202788f371d98f71b85694d813198f474939ba3e3d1112ebc08e",
+        "size_bytes": 15631,
+        "format": "jsonl",
+        "event_count": 163
+      }
+    ],
+    "T1059": [
+      {
+        "dataset_id": "psh_python_webserver",
+        "technique_id": "T1059",
+        "platform": "windows",
+        "url": "https://raw.githubusercontent.com/OTRF/Security-Datasets/master/datasets/atomic/windows/execution/host/psh_python_webserver.zip",
+        "sha256": "58a62e35ee7a78e88cfca86e628e988a7192ec7fb24013b9d3b86766b25c8a17",
+        "size_bytes": 112642,
+        "format": "jsonl",
+        "event_count": 2395
+      },
+      {
+        "dataset_id": "cmd_sharpview_pcre_net",
+        "technique_id": "T1059",
+        "platform": "windows",
+        "url": "https://raw.githubusercontent.com/OTRF/Security-Datasets/master/datasets/atomic/windows/execution/host/cmd_sharpview_pcre_net.zip",
+        "sha256": "314b1d08b9038dd327c8769c82564a44fd26fa1ba17ffa79e52b4683e2821dac",
+        "size_bytes": 28626,
+        "format": "jsonl",
+        "event_count": 267
+      }
+    ],
+    "T1059.001": [
+      {
+        "dataset_id": "psh_powershell_httplistener",
+        "technique_id": "T1059.001",
+        "platform": "windows",
+        "url": "https://raw.githubusercontent.com/OTRF/Security-Datasets/master/datasets/atomic/windows/execution/host/psh_powershell_httplistener.zip",
+        "sha256": "506ba862fd76e0f8d43396e705ec6eebb7a01a5a2954bd70c9f47802d32f4843",
+        "size_bytes": 10491,
+        "format": "jsonl",
+        "event_count": 110
+      }
+    ],
+    "T1059.005": [
+      {
+        "dataset_id": "empire_launcher_vbs",
+        "technique_id": "T1059.005",
+        "platform": "windows",
+        "url": "https://raw.githubusercontent.com/OTRF/Security-Datasets/master/datasets/atomic/windows/execution/host/empire_launcher_vbs.zip",
+        "sha256": "812da270cf8cda6f1948fb6275410f15dc1794d0bd6b623c9c25b2518285019c",
+        "size_bytes": 313016,
+        "format": "jsonl",
+        "event_count": 2067
+      }
+    ],
+    "T1069.001": [
+      {
+        "dataset_id": "empire_shell_net_localgroup_administrators",
+        "technique_id": "T1069.001",
+        "platform": "windows",
+        "url": "https://raw.githubusercontent.com/OTRF/Security-Datasets/master/datasets/atomic/windows/discovery/host/empire_shell_net_localgroup_administrators.zip",
+        "sha256": "7331af9e09f7cb457e7b5a44494e4b2612a810ae50254c6a2d996914d66fe663",
+        "size_bytes": 107970,
+        "format": "jsonl",
+        "event_count": 884
+      },
+      {
+        "dataset_id": "empire_find_localadmin_smb_svcctl_OpenSCManager",
+        "technique_id": "T1069.001",
+        "platform": "windows",
+        "url": "https://raw.githubusercontent.com/OTRF/Security-Datasets/master/datasets/atomic/windows/discovery/host/empire_find_localadmin_smb_svcctl_OpenSCManager.zip",
+        "sha256": "b721c16e8463ff33ffed5415a9d3f874455c8b59d3ebd414ad224539d7892aec",
+        "size_bytes": 719316,
+        "format": "jsonl",
+        "event_count": 4570
+      }
+    ],
+    "T1069.002": [
+      {
+        "dataset_id": "empire_shell_rpc_samr_smb_group_domain_admins_standard_user",
+        "technique_id": "T1069.002",
+        "platform": "windows",
+        "url": "https://raw.githubusercontent.com/OTRF/Security-Datasets/master/datasets/atomic/windows/discovery/host/empire_shell_rpc_samr_smb_group_domain_admins_standard_user.zip",
+        "sha256": "aa5c2a87fc3a38e419e3a3885a886a3f4ea3abb0c2b4e219e06f086c9b54eacb",
+        "size_bytes": 224198,
+        "format": "jsonl",
+        "event_count": 1749
+      },
+      {
+        "dataset_id": "covenant_getdomaingroup_ldap_searchrequest_domain_admins",
+        "technique_id": "T1069.002",
+        "platform": "windows",
+        "url": "https://raw.githubusercontent.com/OTRF/Security-Datasets/master/datasets/atomic/windows/discovery/host/covenant_getdomaingroup_ldap_searchrequest_domain_admins.zip",
+        "sha256": "af11d4d2140d8f9099cdeeb1b469af4dcfb94119f2c1072fb4c5f9e70d354876",
+        "size_bytes": 34808,
+        "format": "jsonl",
+        "event_count": 619
+      }
+    ],
+    "T1087.001": [
+      {
+        "dataset_id": "empire_shell_net_local_users",
+        "technique_id": "T1087.001",
+        "platform": "windows",
+        "url": "https://raw.githubusercontent.com/OTRF/Security-Datasets/master/datasets/atomic/windows/discovery/host/empire_shell_net_local_users.zip",
+        "sha256": "a2cf8016ad2a134f61aec5133bd0aa54f662aa4165f60b30f4204fd31787576c",
+        "size_bytes": 222730,
+        "format": "jsonl",
+        "event_count": 1907
+      }
+    ],
+    "T1087.002": [
+      {
+        "dataset_id": "empire_shell_samr_EnumDomainUsers",
+        "technique_id": "T1087.002",
+        "platform": "windows",
+        "url": "https://raw.githubusercontent.com/OTRF/Security-Datasets/master/datasets/atomic/windows/discovery/host/empire_shell_samr_EnumDomainUsers.zip",
+        "sha256": "b37c022ce7aa5fed3ad7087e2ec1f37d7b1089ec9bfe7b196f974295d255506b",
+        "size_bytes": 99564,
+        "format": "jsonl",
+        "event_count": 633
+      }
+    ],
+    "T1110.003": [
+      {
+        "dataset_id": "purplesharp_ad_playbook_I",
+        "technique_id": "T1110.003",
+        "platform": "windows",
+        "url": "https://raw.githubusercontent.com/OTRF/Security-Datasets/master/datasets/atomic/windows/lateral_movement/host/purplesharp_ad_playbook_I.zip",
+        "sha256": "2a2d80e7b8d8ee6821a1754118f3ab908b4bac84cf4ed3d018e281f631bd2870",
+        "size_bytes": 1362498,
+        "format": "jsonl",
+        "event_count": 25993
+      }
+    ],
+    "T1112": [
+      {
+        "dataset_id": "empire_monologue_netntlm_downgrade",
+        "technique_id": "T1112",
+        "platform": "windows",
+        "url": "https://raw.githubusercontent.com/OTRF/Security-Datasets/master/datasets/atomic/windows/defense_evasion/host/empire_monologue_netntlm_downgrade.zip",
+        "sha256": "27d88aaccf5dbe2b917684eebe35afdfcc88953c70b27ee949e46204a23cda21",
+        "size_bytes": 268217,
+        "format": "jsonl",
+        "event_count": 1635
+      }
+    ],
+    "T1123": [
+      {
+        "dataset_id": "msf_record_mic",
+        "technique_id": "T1123",
+        "platform": "windows",
+        "url": "https://raw.githubusercontent.com/OTRF/Security-Datasets/master/datasets/atomic/windows/collection/host/msf_record_mic.zip",
+        "sha256": "5ea8ac17aceb7a83273019235fcdee67dd0b21cdce6b5d00b2d7e1665444de9e",
+        "size_bytes": 468775,
+        "format": "jsonl",
+        "event_count": 6202
+      }
+    ],
+    "T1134.001": [
+      {
+        "dataset_id": "aptsimulator_cobaltstrike",
+        "technique_id": "T1134.001",
+        "platform": "windows",
+        "url": "https://raw.githubusercontent.com/OTRF/Security-Datasets/master/datasets/atomic/windows/other/aptsimulator_cobaltstrike.zip",
+        "sha256": "e40d119883b3ac097f4011c0d414b306a33b00872c1c235f066a729b9736077c",
+        "size_bytes": 290153,
+        "format": "jsonl",
+        "event_count": 2611
+      }
+    ],
+    "T1134.002": [
+      {
+        "dataset_id": "aptsimulator_cobaltstrike",
+        "technique_id": "T1134.002",
+        "platform": "windows",
+        "url": "https://raw.githubusercontent.com/OTRF/Security-Datasets/master/datasets/atomic/windows/other/aptsimulator_cobaltstrike.zip",
+        "sha256": "e40d119883b3ac097f4011c0d414b306a33b00872c1c235f066a729b9736077c",
+        "size_bytes": 290153,
+        "format": "jsonl",
+        "event_count": 2611
+      }
+    ],
+    "T1135": [
+      {
+        "dataset_id": "purplesharp_ad_playbook_I",
+        "technique_id": "T1135",
+        "platform": "windows",
+        "url": "https://raw.githubusercontent.com/OTRF/Security-Datasets/master/datasets/atomic/windows/lateral_movement/host/purplesharp_ad_playbook_I.zip",
+        "sha256": "2a2d80e7b8d8ee6821a1754118f3ab908b4bac84cf4ed3d018e281f631bd2870",
+        "size_bytes": 1362498,
+        "format": "jsonl",
+        "event_count": 25993
+      }
+    ],
+    "T1197": [
+      {
+        "dataset_id": "cmd_bitsadmin_download_psh_script",
+        "technique_id": "T1197",
+        "platform": "windows",
+        "url": "https://raw.githubusercontent.com/OTRF/Security-Datasets/master/datasets/atomic/windows/defense_evasion/host/cmd_bitsadmin_download_psh_script.zip",
+        "sha256": "8fb7bc9f3d82f672dc39a55e50006137aa540c4a9860acdcc5d08a4fd609b594",
+        "size_bytes": 51563,
+        "format": "jsonl",
+        "event_count": 424
+      }
+    ],
+    "T1210": [
+      {
+        "dataset_id": "mimikatz_CVE-2020-1472_Unauthenticated_NetrServerAuthenticate2",
+        "technique_id": "T1210",
+        "platform": "windows",
+        "url": "https://raw.githubusercontent.com/OTRF/Security-Datasets/master/datasets/atomic/windows/lateral_movement/host/mimikatz_CVE-2020-1472_Unauthenticated_NetrServerAuthenticate2.zip",
+        "sha256": "03b8cefdd0c39bcbb9c4939af6777c8617dcab0a717e04b53a2fe112c3a2eee0",
+        "size_bytes": 78819,
+        "format": "jsonl",
+        "event_count": 790
+      }
+    ],
+    "T1218": [
+      {
+        "dataset_id": "covenant_lolbin_wuauclt_createremotethread",
+        "technique_id": "T1218",
+        "platform": "windows",
+        "url": "https://raw.githubusercontent.com/OTRF/Security-Datasets/master/datasets/atomic/windows/defense_evasion/host/covenant_lolbin_wuauclt_createremotethread.zip",
+        "sha256": "56b6695152f4de18ed23afbbcab2402b03c1ffbbf7c5fd5f6f4e80ec621843ac",
+        "size_bytes": 137136,
+        "format": "jsonl",
+        "event_count": 1326
+      },
+      {
+        "dataset_id": "psh_register_cimprovider_execute_dll",
+        "technique_id": "T1218",
+        "platform": "windows",
+        "url": "https://raw.githubusercontent.com/OTRF/Security-Datasets/master/datasets/atomic/windows/defense_evasion/host/psh_register_cimprovider_execute_dll.zip",
+        "sha256": "a92085e34164be8ffc504270a9b0c4979a73f4e5c8ee5f717adc8525eb0b0109",
+        "size_bytes": 129780,
+        "format": "jsonl",
+        "event_count": 1316
+      }
+    ],
+    "T1218.001": [
+      {
+        "dataset_id": "psh_hh_local_html_payload",
+        "technique_id": "T1218.001",
+        "platform": "windows",
+        "url": "https://raw.githubusercontent.com/OTRF/Security-Datasets/master/datasets/atomic/windows/defense_evasion/host/psh_hh_local_html_payload.zip",
+        "sha256": "c9967cde50a703fa3d139ca73520401bdb7c184930f7b4fb8305e9732167f764",
+        "size_bytes": 135975,
+        "format": "jsonl",
+        "event_count": 1221
+      }
+    ],
+    "T1218.002": [
+      {
+        "dataset_id": "psh_control_panel_execution",
+        "technique_id": "T1218.002",
+        "platform": "windows",
+        "url": "https://raw.githubusercontent.com/OTRF/Security-Datasets/master/datasets/atomic/windows/defense_evasion/host/psh_control_panel_execution.zip",
+        "sha256": "d0c6ab023cb7c9db716dce58f68658d7ab25e7c8ebaaa6fe851a2fa01c55555a",
+        "size_bytes": 151047,
+        "format": "jsonl",
+        "event_count": 1291
+      }
+    ],
+    "T1218.003": [
+      {
+        "dataset_id": "psh_cmstp_execution_bypassuac",
+        "technique_id": "T1218.003",
+        "platform": "windows",
+        "url": "https://raw.githubusercontent.com/OTRF/Security-Datasets/master/datasets/atomic/windows/defense_evasion/host/psh_cmstp_execution_bypassuac.zip",
+        "sha256": "a653c698e8f779261ba0b3ac92bd604d4abe3a510cda8ab1f5ccdd421d013d4c",
+        "size_bytes": 81318,
+        "format": "jsonl",
+        "event_count": 1166
+      }
+    ],
+    "T1218.004": [
+      {
+        "dataset_id": "covenant_installutil",
+        "technique_id": "T1218.004",
+        "platform": "windows",
+        "url": "https://raw.githubusercontent.com/OTRF/Security-Datasets/master/datasets/atomic/windows/defense_evasion/host/covenant_installutil.zip",
+        "sha256": "9be5698bd46e2869b34d0a6ef712725d1e611eb32d87d2d29f37c9e34872fabe",
+        "size_bytes": 111142,
+        "format": "jsonl",
+        "event_count": 1730
+      }
+    ],
+    "T1218.005": [
+      {
+        "dataset_id": "cmd_mshta_javascript_getobject_sct",
+        "technique_id": "T1218.005",
+        "platform": "windows",
+        "url": "https://raw.githubusercontent.com/OTRF/Security-Datasets/master/datasets/atomic/windows/defense_evasion/host/cmd_mshta_javascript_getobject_sct.zip",
+        "sha256": "976a705690dcc296ba132b9cd594c004265911e9e40d402c879dd06eddbbc057",
+        "size_bytes": 125926,
+        "format": "jsonl",
+        "event_count": 1151
+      },
+      {
+        "dataset_id": "cmd_mshta_vbscript_execute_psh",
+        "technique_id": "T1218.005",
+        "platform": "windows",
+        "url": "https://raw.githubusercontent.com/OTRF/Security-Datasets/master/datasets/atomic/windows/defense_evasion/host/cmd_mshta_vbscript_execute_psh.zip",
+        "sha256": "f5f700bc986bbe73edcc209754b28a3e0ad38c56877f7fc5ed6fd04bc036d9f4",
+        "size_bytes": 88544,
+        "format": "jsonl",
+        "event_count": 1127
+      }
+    ],
+    "T1218.010": [
+      {
+        "dataset_id": "empire_launcher_sct_regsvr32",
+        "technique_id": "T1218.010",
+        "platform": "windows",
+        "url": "https://raw.githubusercontent.com/OTRF/Security-Datasets/master/datasets/atomic/windows/defense_evasion/host/empire_launcher_sct_regsvr32.zip",
+        "sha256": "abeb5c52c75286386e5eb999d7423d738a624191f4a95fb62694b471a10b2dab",
+        "size_bytes": 310095,
+        "format": "jsonl",
+        "event_count": 2390
+      }
+    ],
+    "T1220": [
+      {
+        "dataset_id": "wmic_remote_xsl_jscript",
+        "technique_id": "T1220",
+        "platform": "windows",
+        "url": "https://raw.githubusercontent.com/OTRF/Security-Datasets/master/datasets/atomic/windows/defense_evasion/host/wmic_remote_xsl_jscript.zip",
+        "sha256": "f5766221059189dafc8b826abeecd46708bb8e5b21a480ecad6aa0a37f382320",
+        "size_bytes": 132543,
+        "format": "jsonl",
+        "event_count": 1364
+      }
+    ],
+    "T1222.001": [
+      {
+        "dataset_id": "empire_powerview_ldap_ntsecuritydescriptor",
+        "technique_id": "T1222.001",
+        "platform": "windows",
+        "url": "https://raw.githubusercontent.com/OTRF/Security-Datasets/master/datasets/atomic/windows/defense_evasion/host/empire_powerview_ldap_ntsecuritydescriptor.zip",
+        "sha256": "6db5eac7fdab1fd1868047615caf590cb13b64a878e203bf3f253c2527229587",
+        "size_bytes": 1002782,
+        "format": "jsonl",
+        "event_count": 9002
+      }
+    ],
+    "T1505.003": [
+      {
+        "dataset_id": "proxylogon_ssrf_rce_poc",
+        "technique_id": "T1505.003",
+        "platform": "windows",
+        "url": "https://raw.githubusercontent.com/OTRF/Security-Datasets/master/datasets/atomic/windows/persistence/host/proxylogon_ssrf_rce_poc.zip",
+        "sha256": "cc6ef822788c25b03b20e4d6cf3fa268ea0277483b31614c5d432fd7a55bd3e2",
+        "size_bytes": 378892,
+        "format": "jsonl",
+        "event_count": 10487
+      }
+    ],
+    "T1518": [
+      {
+        "dataset_id": "cmd_discover_iexplorer_version_registry",
+        "technique_id": "T1518",
+        "platform": "windows",
+        "url": "https://raw.githubusercontent.com/OTRF/Security-Datasets/master/datasets/atomic/windows/discovery/host/cmd_discover_iexplorer_version_registry.zip",
+        "sha256": "3215b22ff18ea946923431a51edc83e3e0ba5d4b559ff1d6b7d27c16cc5803da",
+        "size_bytes": 9193,
+        "format": "jsonl",
+        "event_count": 68
+      }
+    ],
+    "T1543.003": [
+      {
+        "dataset_id": "cmd_service_mod_fax",
+        "technique_id": "T1543.003",
+        "platform": "windows",
+        "url": "https://raw.githubusercontent.com/OTRF/Security-Datasets/master/datasets/atomic/windows/privilege_escalation/host/cmd_service_mod_fax.zip",
+        "sha256": "4a40cb09c514f1a4c601588cbfa5c81e12a6f8a5ab92fd76bad846c1a4352447",
+        "size_bytes": 36023,
+        "format": "jsonl",
+        "event_count": 437
+      }
+    ],
+    "T1546.003": [
+      {
+        "dataset_id": "empire_wmi_local_event_subscriptions_elevated_user",
+        "technique_id": "T1546.003",
+        "platform": "windows",
+        "url": "https://raw.githubusercontent.com/OTRF/Security-Datasets/master/datasets/atomic/windows/persistence/host/empire_wmi_local_event_subscriptions_elevated_user.zip",
+        "sha256": "a507f2edd768b592e6b3157e974fd0468965eee00407387d88356ecb8fd20fea",
+        "size_bytes": 6043932,
+        "format": "jsonl",
+        "event_count": 79896
+      }
+    ],
+    "T1547.001": [
+      {
+        "dataset_id": "empire_persistence_registry_modification_run_keys_standard_user",
+        "technique_id": "T1547.001",
+        "platform": "windows",
+        "url": "https://raw.githubusercontent.com/OTRF/Security-Datasets/master/datasets/atomic/windows/persistence/host/empire_persistence_registry_modification_run_keys_standard_user.zip",
+        "sha256": "2965f791bcaf5e6ccfc4059985e81fd7e67ec87f17855b6c383edd1b03a19c36",
+        "size_bytes": 3550216,
+        "format": "jsonl",
+        "event_count": 40569
+      },
+      {
+        "dataset_id": "empire_persistence_registry_modification_run_keys_elevated_user",
+        "technique_id": "T1547.001",
+        "platform": "windows",
+        "url": "https://raw.githubusercontent.com/OTRF/Security-Datasets/master/datasets/atomic/windows/persistence/host/empire_persistence_registry_modification_run_keys_elevated_user.zip",
+        "sha256": "2809354d679025859d723be3ceb1e2c9f9e5dde2ebec5bbea7c398e165a9b67d",
+        "size_bytes": 102384,
+        "format": "jsonl",
+        "event_count": 657
+      }
+    ],
+    "T1548.002": [
+      {
+        "dataset_id": "empire_uac_shellapi_fodhelper",
+        "technique_id": "T1548.002",
+        "platform": "windows",
+        "url": "https://raw.githubusercontent.com/OTRF/Security-Datasets/master/datasets/atomic/windows/privilege_escalation/host/empire_uac_shellapi_fodhelper.zip",
+        "sha256": "b8cc7aae826f5e4aea3ea47b2b6db69b062c39201de8de9621d5081622d3c504",
+        "size_bytes": 712457,
+        "format": "jsonl",
+        "event_count": 4139
+      }
+    ],
+    "T1550.002": [
+      {
+        "dataset_id": "empire_over_pth_patch_lsass",
+        "technique_id": "T1550.002",
+        "platform": "windows",
+        "url": "https://raw.githubusercontent.com/OTRF/Security-Datasets/master/datasets/atomic/windows/credential_access/host/empire_over_pth_patch_lsass.zip",
+        "sha256": "daee42bbd9f7c6265e5614ce468ec868a399ee03877456dd01ec34e3e06479e7",
+        "size_bytes": 829257,
+        "format": "jsonl",
+        "event_count": 10271
+      }
+    ],
+    "T1558.003": [
+      {
+        "dataset_id": "purplesharp_ad_playbook_I",
+        "technique_id": "T1558.003",
+        "platform": "windows",
+        "url": "https://raw.githubusercontent.com/OTRF/Security-Datasets/master/datasets/atomic/windows/lateral_movement/host/purplesharp_ad_playbook_I.zip",
+        "sha256": "2a2d80e7b8d8ee6821a1754118f3ab908b4bac84cf4ed3d018e281f631bd2870",
+        "size_bytes": 1362498,
+        "format": "jsonl",
+        "event_count": 25993
+      }
+    ],
+    "T1562.002": [
+      {
+        "dataset_id": "auditpol_system_user_auditpolicy_modification",
+        "technique_id": "T1562.002",
+        "platform": "windows",
+        "url": "https://raw.githubusercontent.com/OTRF/Security-Datasets/master/datasets/atomic/windows/defense_evasion/host/auditpol_system_user_auditpolicy_modification.zip",
+        "sha256": "5eb1776e7e9f79060a87ed9efcce0eebbab7940f8f51db8b2d67368c64e2187d",
+        "size_bytes": 611270,
+        "format": "jsonl",
+        "event_count": 13645
+      },
+      {
+        "dataset_id": "reg_cmd_process_commandline_logging_disabled",
+        "technique_id": "T1562.002",
+        "platform": "windows",
+        "url": "https://raw.githubusercontent.com/OTRF/Security-Datasets/master/datasets/atomic/windows/defense_evasion/host/reg_cmd_process_commandline_logging_disabled.zip",
+        "sha256": "59ba811e1d268916b8ef0b65d0cd8ae3ffde0bb59a680ae72d8740eb36cd9b67",
+        "size_bytes": 357127,
+        "format": "jsonl",
+        "event_count": 8705
+      }
+    ],
+    "T1562.004": [
+      {
+        "dataset_id": "cmd_netsh_fw_mod_open_ports",
+        "technique_id": "T1562.004",
+        "platform": "windows",
+        "url": "https://raw.githubusercontent.com/OTRF/Security-Datasets/master/datasets/atomic/windows/defense_evasion/host/cmd_netsh_fw_mod_open_ports.zip",
+        "sha256": "3d887b38c6a92892f950029f40114fe4598a798ad20453671dbe3d111b9ce4a2",
+        "size_bytes": 97711,
+        "format": "jsonl",
+        "event_count": 2366
+      }
+    ],
+    "T1574.001": [
+      {
+        "dataset_id": "empire_shell_dcerpc_smb_service_dll_hijack",
+        "technique_id": "T1574.001",
+        "platform": "windows",
+        "url": "https://raw.githubusercontent.com/OTRF/Security-Datasets/master/datasets/atomic/windows/lateral_movement/host/empire_shell_dcerpc_smb_service_dll_hijack.zip",
+        "sha256": "59265c906bf2fdac09b876cfa137f6e81e645d85d550c5b4efdebb8f3f491428",
+        "size_bytes": 865367,
+        "format": "jsonl",
+        "event_count": 6349
       }
     ]
-  },
-  "note": "Curated snapshot: only datasets verified live in Security-Datasets are listed. Refresh periodically as the upstream repo changes. sha256 is enforced before extraction."
+  }
 }
