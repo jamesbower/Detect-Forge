@@ -133,3 +133,30 @@ def test_backtest_would_gate_on_either_input() -> None:
     assert backtest_would_gate(_make_backtest_report(
         parsed=10, unsupported=0, fires=10, priority_silent=0, silent_on_all=0,
     )) is False
+
+
+def test_coverage_would_gate_respects_config_flag() -> None:
+    """gate_on_priority_gaps=False disables the coverage gate (C5)."""
+    from detect_forge.audit.scoring import coverage_would_gate
+
+    r = _make_coverage_report(total=10, full=5, priority_gap=2)
+    assert coverage_would_gate(r) is True
+    assert coverage_would_gate(r, gate_on_priority_gaps=False) is False
+
+
+def test_backtest_would_gate_respects_config_flags() -> None:
+    """gate_on_priority_silence / gate_on_broken_rules can each disable a gate (C5)."""
+    from detect_forge.audit.scoring import backtest_would_gate
+
+    r = _make_backtest_report(
+        parsed=5, unsupported=0, fires=1, priority_silent=1, silent_on_all=1
+    )
+    assert backtest_would_gate(r) is True
+    assert (
+        backtest_would_gate(
+            r, gate_on_priority_silence=False, gate_on_broken_rules=False
+        )
+        is False
+    )
+    # Broken-rules alone still gates when only that flag is on.
+    assert backtest_would_gate(r, gate_on_priority_silence=False) is True

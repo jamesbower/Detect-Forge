@@ -52,6 +52,9 @@ def run_audit(
     semantic_threshold: float = 0.65,
     llm_model: str | None = None,
     max_proposals: int = 5,
+    coverage_gate_on_priority_gaps: bool = True,
+    backtest_gate_on_priority_silence: bool = True,
+    backtest_gate_on_broken_rules: bool = True,
 ) -> AuditReport:
     """Compose all 3 subcommands into a single AuditReport.
 
@@ -120,7 +123,9 @@ def run_audit(
             sub_results.append(AuditSubResult(
                 subcommand="coverage",
                 status="ran",
-                would_gate=coverage_would_gate(cov_report),
+                would_gate=coverage_would_gate(
+                    cov_report, gate_on_priority_gaps=coverage_gate_on_priority_gaps
+                ),
                 score=coverage_completeness(cov_report),
                 coverage_report=cov_report,
             ))
@@ -152,7 +157,11 @@ def run_audit(
             sub_results.append(AuditSubResult(
                 subcommand="backtest",
                 status="ran",
-                would_gate=backtest_would_gate(bt_report),
+                would_gate=backtest_would_gate(
+                    bt_report,
+                    gate_on_priority_silence=backtest_gate_on_priority_silence,
+                    gate_on_broken_rules=backtest_gate_on_broken_rules,
+                ),
                 score=backtest_verification_rate(bt_report),
                 backtest_report=bt_report,
             ))

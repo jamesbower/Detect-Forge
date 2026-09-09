@@ -193,3 +193,52 @@ def test_cli_writes_output_file(
     assert out_file.exists()
     text = out_file.read_text()
     assert "summary" in text
+
+
+def test_cli_composes_per_subcommand_config(
+    mocker: MockerFixture, monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    """audit loads [stale]/[coverage]/[backtest] config and forwards it (C5)."""
+    monkeypatch.delenv("XDG_CACHE_HOME", raising=False)
+    monkeypatch.delenv("DETECT_FORGE_SEMANTIC_THRESHOLD", raising=False)
+    proj = tmp_path / "proj"
+    proj.mkdir()
+    (proj / ".detect-forge.toml").write_text(
+        '[stale]\nsemantic_threshold = 0.8\n'
+        '[coverage]\ngate_on_priority_gaps = false\npriority_list = "p.json"\n'
+        '[backtest]\ngate_on_priority_silence = false\nplatform = "windows"\n'
+    )
+    rules = proj / "rules"
+    rules.mkdir()
+    monkeypatch.chdir(proj)
+    scan_mock = mocker.patch(
+        "detect_forge.audit.scan_audit", return_value=_fake_audit_report()
+    )
+    runner = CliRunner()
+    result = runner.invoke(main, ["audit", str(rules)])
+    assert result.exit_code == 0, result.stderr
+    kw = scan_mock.call_args.kwargs
+    assert kw["semantic_threshold"] == 0.8
+    assert kw["coverage_gate_on_priority_gaps"] is False
+    assert kw["backtest_gate_on_priority_silence"] is False
+    assert kw["platform"] == "windows"
+    assert kw["priority_list"] == proj / "p.json"
+
+
+def test_cli_mordor_source_forwarded(
+    mocker: MockerFixture, monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    monkeypatch.delenv("XDG_CACHE_HOME", raising=False)
+    rules = tmp_path / "rules"
+    rules.mkdir()
+    checkout = tmp_path / "sec-datasets"
+    checkout.mkdir()
+    scan_mock = mocker.patch(
+        "detect_forge.audit.scan_audit", return_value=_fake_audit_report()
+    )
+    runner = CliRunner()
+    result = runner.invoke(
+        main, ["audit", str(rules), "--mordor-source", str(checkout)]
+    )
+    assert result.exit_code == 0, result.stderr
+    assert scan_mock.call_args.kwargs["mordor_source"] == checkout

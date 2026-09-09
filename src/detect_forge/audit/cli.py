@@ -6,17 +6,29 @@ import logging
 from pathlib import Path
 
 import click
+from click.core import ParameterSource
 from rich.progress import Progress, SpinnerColumn, TextColumn
 
-from ..config import load_audit_config_or_defaults
+from ..config import (
+    find_config_file,
+    load_audit_config_or_defaults,
+    load_backtest_config_or_defaults,
+    load_coverage_config_or_defaults,
+    load_stale_config_or_defaults,
+)
 from ..console import err_console
 from ..exit_codes import GATED, RESERVED
 from ..settings import Settings
 
 log = logging.getLogger(__name__)
 
-_VALID_SUBCOMMANDS = {"stale", "coverage", "backtest"}
-_DEFAULT_LLM_MODEL = "gpt-4o-mini"
+
+def _abs_against(base: Path | None, value: str) -> Path:
+    """Resolve a possibly-relative config path against the config-file dir."""
+    p = Path(value)
+    if p.is_absolute() or base is None:
+        return p
+    return base / p
 
 
 @click.command(name="audit")
@@ -72,6 +84,11 @@ _DEFAULT_LLM_MODEL = "gpt-4o-mini"
     help="Backtest-only: limit Mordor datasets by platform",
 )
 @click.option(
+    "--mordor-source",
+    type=click.Path(exists=True, path_type=Path), default=None,
+    help="Backtest-only: local Security-Datasets checkout (overrides config)",
+)
+@click.option(
     "--techniques", default=None,
     help="Backtest-only: comma-separated technique IDs to restrict scan",
 )
@@ -93,6 +110,7 @@ def audit_cmd(
     priority_list: Path | None,
     with_llm_proposals: bool,
     platform: str,
+    mordor_source: Path | None,
     techniques: str | None,
     semantic_threshold: float,
 ) -> None:
@@ -101,6 +119,11 @@ def audit_cmd(
 
     settings = Settings()
     audit_cfg = load_audit_config_or_defaults()
+    stale_cfg = load_stale_config_or_defaults()
+    coverage_cfg = load_coverage_config_or_defaults()
+    backtest_cfg = load_backtest_config_or_defaults()
+    config_file = find_config_file()
+    config_dir = config_file.parent if config_file is not None else None
     effective_no_cache = no_cache or settings.no_cache
 
     # Compute enabled subcommands: config.subcommands MINUS CLI --skip.
@@ -125,10 +148,31 @@ def audit_cmd(
     if no_gate:
         effective_gate_strategy = "never"
 
-    # LLM: opt-in via CLI flag or config.
+    # LLM: opt-in via CLI flag or config; model + quota come from [stale].
     effective_llm_model: str | None = None
     if with_llm_proposals or audit_cfg.include_llm_proposals:
-        effective_llm_model = _DEFAULT_LLM_MODEL
+        effective_llm_model = stale_cfg.llm_model
+
+    # Semantic threshold precedence: env > CLI-explicit > [stale] config > default.
+    effective_threshold = stale_cfg.semantic_threshold
+    if ctx.get_parameter_source("semantic_threshold") == ParameterSource.COMMANDLINE:
+        effective_threshold = semantic_threshold
+    if settings.semantic_threshold is not None:
+        effective_threshold = settings.semantic_threshold
+
+    # Priority list: CLI --priority-list wins; else [coverage] priority_list
+    # resolved against the config-file dir (shared by coverage + backtest).
+    effective_priority: Path | None = priority_list
+    if effective_priority is None and coverage_cfg.priority_list:
+        effective_priority = _abs_against(config_dir, coverage_cfg.priority_list)
+
+    # Platform / mordor-source: CLI overrides [backtest] config.
+    effective_platform = platform
+    if ctx.get_parameter_source("platform") != ParameterSource.COMMANDLINE:
+        effective_platform = backtest_cfg.platform
+    effective_mordor: Path | None = mordor_source
+    if effective_mordor is None and backtest_cfg.mordor_source:
+        effective_mordor = _abs_against(config_dir, backtest_cfg.mordor_source)
 
     # Technique filter parse.
     technique_filter: set[str] | None = None
@@ -150,11 +194,16 @@ def audit_cmd(
             cache_dir=settings.cache_dir,
             cache_ttl_hours=settings.cache_ttl_hours,
             no_cache=effective_no_cache,
-            priority_list=priority_list,
-            platform=platform,
+            priority_list=effective_priority,
+            platform=effective_platform,
             technique_filter=technique_filter,
-            semantic_threshold=semantic_threshold,
+            mordor_source=effective_mordor,
+            semantic_threshold=effective_threshold,
             llm_model=effective_llm_model,
+            max_proposals=stale_cfg.max_proposals,
+            coverage_gate_on_priority_gaps=coverage_cfg.gate_on_priority_gaps,
+            backtest_gate_on_priority_silence=backtest_cfg.gate_on_priority_silence,
+            backtest_gate_on_broken_rules=backtest_cfg.gate_on_broken_rules,
         )
         progress.remove_task(prog_task)
 

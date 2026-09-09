@@ -62,17 +62,29 @@ def stale_would_gate(report: StalenessReport) -> bool:
     return report.summary.critical > 0
 
 
-def coverage_would_gate(report: CoverageReport) -> bool:
-    """Coverage gates when priority_gap > 0 (gate_on_priority_gaps applied separately)."""
-    return report.summary.priority_gap > 0
+def coverage_would_gate(
+    report: CoverageReport, *, gate_on_priority_gaps: bool = True
+) -> bool:
+    """Coverage gates when priority_gap > 0, honouring the config flag.
+
+    ``gate_on_priority_gaps=False`` (from ``[coverage]`` config) disables the
+    gate entirely, matching the standalone ``coverage`` command.
+    """
+    return gate_on_priority_gaps and report.summary.priority_gap > 0
 
 
-def backtest_would_gate(report: BacktestReport) -> bool:
+def backtest_would_gate(
+    report: BacktestReport,
+    *,
+    gate_on_priority_silence: bool = True,
+    gate_on_broken_rules: bool = True,
+) -> bool:
     """Backtest gates on priority silence OR broken rules (the two-gate semantics).
 
-    Config gate flags (gate_on_priority_silence, gate_on_broken_rules) are
-    NOT consulted here by design — these predicates report the raw report
-    state. Callers apply config filtering before invoking.
+    Each gate honours its ``[backtest]`` config flag, matching the standalone
+    ``backtest`` command; a disabled flag drops that condition.
     """
     s = report.summary
-    return s.priority_silent > 0 or s.rules_silent_on_all > 0
+    return (gate_on_priority_silence and s.priority_silent > 0) or (
+        gate_on_broken_rules and s.rules_silent_on_all > 0
+    )

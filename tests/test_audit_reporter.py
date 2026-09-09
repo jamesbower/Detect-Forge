@@ -230,3 +230,16 @@ def test_html_render_gate_fired_banner_when_audit_would_gate() -> None:
     out = render(_make_report(audit_would_gate=True), output_format="html")
     assert "AUDIT GATE FIRED" in out
     assert "gate-fired" in out  # CSS class
+
+
+def test_extract_body_content_handles_attributes() -> None:
+    """A <body> with attributes is unwrapped correctly (C9)."""
+    from detect_forge.audit.reporter import _extract_body_content
+
+    assert (
+        _extract_body_content('<html><body class="x" id="y">INNER</body></html>')
+        == "INNER"
+    )
+    assert _extract_body_content("<body>PLAIN</body>") == "PLAIN"
+    # Missing markers → fall back to the whole document.
+    assert _extract_body_content("<div>no body</div>") == "<div>no body</div>"

@@ -10,6 +10,7 @@ that merge-or-split decision to v0.2. Callers get a clear error.
 
 from __future__ import annotations
 
+import re
 from io import StringIO
 
 from jinja2 import Environment, PackageLoader
@@ -137,15 +138,16 @@ def _render_subcommand_section(sr: AuditSubResult) -> str:
 def _extract_body_content(full_html: str) -> str:
     """Extract the inner <body>...</body> content for embedding.
 
-    Falls back to returning the full document if the markers are missing —
+    Handles a ``<body>`` opening tag with attributes (e.g. ``<body class="x">``)
+    and falls back to returning the full document if the markers are missing —
     keeps the audit render robust against template drift in the subcommand
     reporters.
     """
-    start = full_html.find("<body>")
-    end = full_html.find("</body>")
-    if start == -1 or end == -1:
+    open_match = re.search(r"<body[^>]*>", full_html, re.IGNORECASE)
+    end = full_html.lower().find("</body>")
+    if open_match is None or end == -1:
         return full_html
-    return full_html[start + len("<body>"):end].strip()
+    return full_html[open_match.end():end].strip()
 
 
 def _render_html(report: AuditReport) -> str:
