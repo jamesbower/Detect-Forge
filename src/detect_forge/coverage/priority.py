@@ -37,16 +37,33 @@ def _validate_technique_ids(ids: list[str], source_hint: str) -> set[str]:
 
 
 def load_priority_techniques(path: Path) -> set[str]:
-    """Load a priority list from a JSON file. Raises on missing/malformed input."""
+    """Load a priority list from a JSON file. Raises on missing/malformed input.
+
+    A file that resolves to *zero* technique IDs (empty list, or a mistyped
+    ``technique_ids`` key) raises ``ValueError`` rather than returning an empty
+    set — an empty priority set silently disables CI gating, which is exactly
+    the failure a custom priority list is meant to prevent.
+    """
     if not path.is_file():
         raise FileNotFoundError(f"Priority list not found: {path}")
-    raw: dict[str, Any] = json.loads(path.read_text(encoding="utf-8"))
+    raw: Any = json.loads(path.read_text(encoding="utf-8"))
+    if not isinstance(raw, dict):
+        raise ValueError(
+            f"Priority list at {path} must be a JSON object with a "
+            f"'technique_ids' array (got {type(raw).__name__})"
+        )
     tids = raw.get("technique_ids", [])
     if not isinstance(tids, list):
         raise ValueError(
             f"Priority list at {path} has malformed 'technique_ids' (expected list)"
         )
-    return _validate_technique_ids(tids, source_hint=str(path))
+    ids = _validate_technique_ids(tids, source_hint=str(path))
+    if not ids:
+        raise ValueError(
+            f"Priority list at {path} contains no valid technique IDs — check "
+            f"that the top-level 'technique_ids' array is present and non-empty"
+        )
+    return ids
 
 
 def load_builtin_priority_techniques() -> set[str]:

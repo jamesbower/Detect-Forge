@@ -30,6 +30,35 @@ def test_load_priority_techniques_missing_file_raises() -> None:
         load_priority_techniques(Path("/nonexistent/priority.json"))
 
 
+def test_load_priority_techniques_wrong_key_raises(tmp_path: Path) -> None:
+    """A mistyped key (e.g. 'techniques') must not silently disable gating (C1)."""
+    from detect_forge.coverage.priority import load_priority_techniques
+
+    p = tmp_path / "wrong_key.json"
+    p.write_text('{"name": "oops", "techniques": ["T1078", "T1190"]}')
+    with pytest.raises(ValueError, match="technique_ids|no valid"):
+        load_priority_techniques(p)
+
+
+def test_load_priority_techniques_empty_list_raises(tmp_path: Path) -> None:
+    from detect_forge.coverage.priority import load_priority_techniques
+
+    p = tmp_path / "empty.json"
+    p.write_text('{"technique_ids": []}')
+    with pytest.raises(ValueError):
+        load_priority_techniques(p)
+
+
+def test_load_priority_techniques_non_object_raises(tmp_path: Path) -> None:
+    """A bare-array priority list is a clean ValueError, not AttributeError (C2)."""
+    from detect_forge.coverage.priority import load_priority_techniques
+
+    p = tmp_path / "array.json"
+    p.write_text('["T1078", "T1190"]')
+    with pytest.raises(ValueError):
+        load_priority_techniques(p)
+
+
 def test_load_builtin_priority_techniques_returns_set() -> None:
     """The built-in CTID list parses and returns a non-empty set of IDs."""
     from detect_forge.coverage.priority import load_builtin_priority_techniques
