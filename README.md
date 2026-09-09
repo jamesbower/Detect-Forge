@@ -1,5 +1,8 @@
 # Detect-Forge
 
+[![PyPI](https://img.shields.io/pypi/v/detect-forge.svg)](https://pypi.org/project/detect-forge/)
+[![CI](https://github.com/jamesbower/Detect-Forge/actions/workflows/ci.yml/badge.svg)](https://github.com/jamesbower/Detect-Forge/actions/workflows/ci.yml)
+
 AI-Native Detection engineering toolkit. One install, one config, one CI step.
 
 ## Overview
@@ -27,6 +30,12 @@ Designed to run in GitHub Actions as a CI gate. No data leaves your environment.
 - Python **3.12** or newer
 
 ## Install
+
+```bash
+pip install detect-forge
+```
+
+For development (editable install with dev tooling):
 
 ```bash
 # Requires Python 3.12+ — use python3.12 explicitly, or any python3 that is >= 3.12
@@ -421,7 +430,10 @@ for score in report.scores:
 pytest -q                     # run the test suite
 ruff check src/ tests/        # lint
 mypy src/                     # type-check (strict)
+python -m build && twine check dist/*   # verify the package builds cleanly
 ```
+
+See [RELEASING.md](RELEASING.md) for how to cut a release to PyPI.
 
 The package layout:
 
